@@ -125,7 +125,7 @@ on the record.
 
 The strongest evidence that the pipeline does not force results is that it
 **retracted its own claims eight times**. Each retraction is kept in
-`docs/RETRACTIONS.md`; none was deleted.
+`GW_STATUS_2026-09-26.md`; none was deleted.
 
 | # | retracted claim | how it was caught |
 |---|---|---|
@@ -257,23 +257,29 @@ build from **602.3 s to 2.6 s — a factor of 231.7** — while removing the def
 
 ```bash
 # corrected build + phases 1..6 (incl. ball-arithmetic phase 6)
-python src/eigenspectrum/gw_corrected_eig.py 100 40 180
+python gw_corrected_eig.py 100 40 180
 
 # shipped vs corrected, same code path
-python src/eigenspectrum/gw_compare_builds.py 100 40 140
+python gw_compare_builds.py 100 40 140
 
 # precision ladder for lambda_min
-python src/eigenspectrum/gw_lam_dps.py 100 40 180 260 340
+python gw_lam_dps.py 100 40 180 260 340
 
 # A1: certified tolerance + measured entry error
-python src/certified/gw_arb_sweep.py data/gw_matrix_100_40_dps180.json
-python src/certified/gw_entry_error.py 100 40 180 260 data/gw_matrix_100_40_dps180.json
+python gw_arb_sweep.py gw_matrix_100_200_dps400.json
+
+# entry-error dps-doubling: loads a saved matrix at dps_lo, rebuilds it at dps_hi.
+# The dps-180 / dps-260 input matrices of record are NOT shipped in this repo --
+# only gw_matrix_100_200_dps400.json is -- so the line below documents the
+# invocation and is not runnable from the shipped data alone (see the
+# entry-error retraction in GW_STATUS_2026-09-26.md).
+python gw_entry_error.py 100 40 180 260 <matrix_dps180.json>
 
 # A2: interval eigen-solver
-python src/eigenspectrum/gw_corrected_eig.py 100 40 180      # phase 6
+python gw_corrected_eig.py 100 40 180      # phase 6
 
 # identity gate
-python src/gates/gw_final_gate.py 100 40 160 1000 224
+python gw_final_gate.py 100 40 160 1000 224
 ```
 
 ---
@@ -310,8 +316,8 @@ primary source and never reconstructed from memory:
 
 | material | licence |
 |---|---|
-| **source code** (`src/`, `scripts/`, all `*.py`) | **MIT** — `LICENSE` |
-| **scholarly documents** (`WORKING_PAPER.md`, `README.md`, `REPO_STRUCTURE.md`, `CITATION.cff`, `docs/`, `logs/`, `data/`) | **CC-BY-4.0** — `LICENSE-DOCS.md` |
+| **source code** (all `*.py`) | **MIT** — `LICENSE` |
+| **scholarly documents** (`*.md`, `*.txt`, `*.json`, `*.log`, `*.cff`, `*.sha256`) | **CC-BY-4.0** — `LICENSE-DOCS.md` |
 
 * Mathematical statement of $Q$: attributed to the primary source above — **not**
   relicensed by us.

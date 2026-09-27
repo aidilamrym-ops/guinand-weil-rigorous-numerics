@@ -1,4 +1,6 @@
-# OMEGA Framework — Certified Enclosure of Guinand–Weil Matrices at Extreme Scale
+# Rigorous Ball Arithmetic and Bandwidth-Calibrated Spectral Analysis of the Guinand-Weil Operator Framework
+
+## OMEGA Framework — Certified Enclosure of Guinand–Weil Matrices at Extreme Scale
 
 <p align="center">
 <strong>Muhammad Aidil Amry</strong><br>
@@ -246,6 +248,8 @@ build from **602.3 s to 2.6 s — a factor of 231.7** — while removing the def
 | $\lambda_{\min}(Q_{100,20})$ | $+3.0256658\times10^{-62}$ | `RESOLVED POSITIF`, dps 70 & 100 |
 | c = 13 ladder, rung $N=64$ | $\lambda_{\min}=6.32135140948\times10^{-59}$ | identity valid 19 orders below |
 | source-anchored point | $(13,4)$: $9.67926186051\times10^{-15}$ | only source-anchored value |
+| Montgomery S2 Unfolding ($\sigma_u = 1.0$) | Power 94.4% ($N=401$), 92.7% ($N=801$), sep = 3.96 $\to$ 5.85 | `VALID OPERATIONAL DOMAIN` |
+| S2 Undersmoothing Bias ($\sigma_u \le 0.5$) | sep < 1 (empty decision window), invariant/worse at $N=801$ | `ESTIMATOR PROPERTY` (not $N$-ceiling) |
 
 ---
 
@@ -311,7 +315,7 @@ primary source and never reconstructed from memory:
 
 * Mathematical statement of $Q$: attributed to the primary source above — **not**
   relicensed by us.
-* Status: **working repository accompanying `logs/GW_STATUS_2026-09-26.md`.**
+* Status: **working repository accompanying `GW_STATUS_2026-09-26.md`.**
   Open items are listed in §8 of that file and are **not** started without
   explicit instruction.
 

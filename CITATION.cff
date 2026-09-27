@@ -13,7 +13,7 @@ version: 1.0.0
 date-released: 2026-09-27
 
 license: MIT
-repository-code: "https://github.com/REPLACE_ME/omega-guinand-weil"
+repository-code: "https://github.com/aidilamrym-ops/guinand-weil-rigorous-numerics"
 keywords:
   - ball-arithmetic
   - verified-numerics

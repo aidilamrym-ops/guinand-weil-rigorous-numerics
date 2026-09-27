@@ -14,13 +14,19 @@ Rigorous Ball Arithmetic and Bandwidth-Calibrated Spectral Analysis of the Guina
 ## 2. Authors / Creators
 
 ```
-Dahlia, Muhammad Aidil Amry
+Amry, Muhammad Aidil
 ```
 
 | field | value |
 |---|---|
 | Affiliation | Independent Researcher \| South Sulawesi, Indonesia |
 | ORCID | `0009-0002-9718-9710` |
+
+Zenodo parses `name` as `Family, Given`. This was corrected from the earlier
+draft `Dahlia, Muhammad Aidil Amry`, which made *Dahlia* the family name, to match
+the public ORCID record `0009-0002-9718-9710` (`family-name: Amry`,
+`given-names: Muhammad Aidil`) that `CITATION.cff` already followed. Architect's
+decision, 2026-09-27 — recorded here rather than changed silently.
 
 ## 3. Upload type / Access / License
 

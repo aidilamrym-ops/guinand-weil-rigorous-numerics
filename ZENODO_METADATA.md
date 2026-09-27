@@ -55,8 +55,9 @@ instrument returns S1 = INCONCLUSIVE and S2 = INCONSISTENT WITH MONTGOMERY;
 neither is a confirmation of Montgomery's conjecture.
 
 Includes complete forensic audit trails and cryptographic provenance manifests,
-together with an explicit register of known residual defects. No claim is made
-about the Riemann Hypothesis, Weil positivity, prime counting, or integer
+together with an explicit register of known residual defects (cacat 18, cacat
+19, and the unexplained K5 row of the pipeline report). No claim is made about
+the Riemann Hypothesis, Weil positivity, prime counting, or integer
 factorisation.
 ```
 
@@ -80,7 +81,12 @@ Guinand-Weil Formula, Ball Arithmetic, Arbitrary Precision, Spectral Analysis, R
 
 ## 7. NOTE ON CLAIM EDITING (recorded openly, not done silently)
 
-The abstract above differs from the originally drafted text in **one** place.
+The abstract above differs from the originally drafted text in **one** place
+(entry 7a below), and this file was additionally realigned with `.zenodo.json`
+in one place (entry 7b). Both are recorded here rather than changed silently.
+
+### 7a. Spectral-correlation wording
+
 The draft listed *spectral correlation* among the things the codebase
 **"verifies"**. That wording is not supported by the audited verdicts:
 
@@ -101,3 +107,21 @@ Everything else in the draft — `201+200=401`, `10^-398`, `10^-1170`,
 - `GW_STATUS_2026-09-26.md:316,342` — `delta_Linf = 4.1137004583661995868e-398`
 - `GW_STATUS_2026-09-26.md:1015` — enclosure radius `1.8120487388668704061e-1170`
 - `gw_s2_ceiling_run3.log` — power `94.4%` (N=401) / `92.7%` (N=801) at `sigma_u = 1.0`
+
+### 7b. Paste block realigned with `.zenodo.json` (Architect's decision, 2026-09-27)
+
+Section 4 of this file and the `description` field of `.zenodo.json` differed by
+exactly one sentence — 1085 vs 1157 characters, everything else byte-equal after
+whitespace normalisation:
+
+| source | end of the final paragraph |
+|---|---|
+| `.zenodo.json` | "...an explicit register of known residual defects **(cacat 18, cacat 19, and the unexplained K5 row of the pipeline report)**." |
+| this file (before) | "...an explicit register of known residual defects." |
+
+The shorter form was the omission. The Architect chose to **publish the explicit
+list**, so section 4 now carries the parenthetical naming all three residuals.
+This only names defects that are already registered openly in
+`GW_STATUS_2026-09-26.md` (§7a, §7h.6–§7h.8) — it adds no new claim and retracts
+nothing. The cross-check `zenodo_xcheck.py` asserts the two strings are equal
+after whitespace normalisation, so they cannot drift apart again silently.

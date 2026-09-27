@@ -1,0 +1,109 @@
+================================================================================
+PROVENANCE.txt -- Guinand-Weil OPSI (d) verification chain
+Generated : 2026-09-27
+Scope     : SHA-256 of the scripts, run logs and input that constitute the
+            evidence for the OPSI (d) verdicts. Living documents
+            (GW_STATUS_2026-09-26.md, state/STATE.md, state/PROJECT_REGISTRY.json)
+            are deliberately NOT hashed here: they are edited as work proceeds,
+            so hashing them would produce a stale record by construction.
+            Hash them at the moment of archiving if a frozen copy is needed.
+
+================================================================================
+1. VERIFICATION SCRIPTS
+================================================================================
+file                      bytes   mtime              SHA-256
+gw_montgomery.py          28223   2026-09-27 15:51:18 072910f232b15768ba35e14d7cc6aaf4fe1ee174dc45b65429460f791196e1d5
+gw_mont_pipeline_check.py 11973   2026-09-27 15:57:05 a089e78a89acd0a3478d7586a4665f6db402d34b77055ece3b9877fb45f56971
+gw_s2_ceiling.py          14033   2026-09-27 18:50:17 3d56dc164d9f803cb74ef7a5f812cb51e40594fd87693ec7c107b64e2859576a
+gw_spectrum_arb.py        13646   2026-09-27 14:34:05 bb0fb6414d2e4bbacff2d93ecd36bf3de175ad18de218948b1ca0dc3e4318641
+
+  gw_montgomery.py       : the instrument (S1 gap ratio + S2 pair correlation).
+                           Contains the defect 15/16/17 fixes.
+  gw_mont_pipeline_check.py : gate script K1..K6. Defect 18 (closing sentence
+                           too broad) is intentionally LEFT UNCHANGED so that
+                           log and code stay mutually consistent.
+  gw_s2_ceiling.py       : ceiling diagnostic written 27 Sep (TEST 0 / A / B).
+                           Imports gw_montgomery READ-ONLY; injects G.T0 instead
+                           of editing the audited module.
+  gw_spectrum_arb.py     : spectrum generator. mtime 14:34:05 sits AFTER the
+                           pre-registration lock (14:32:35) and BEFORE the
+                           eigen run (14:34:39) -- see the provenance chain in
+                           state/STATE.md.
+
+================================================================================
+2. INPUT DATA (bit-identical for run 1 and run 2)
+================================================================================
+file                      bytes   mtime              SHA-256
+gw_spectrum_100_200.json  60543   2026-09-27 15:05:41 8cffccf31c587f9bdd5b0fcc4bf3427dcc2dd2884e5766cf5067dc809a8bfc45
+
+================================================================================
+3. RUN LOGS
+================================================================================
+file                              bytes  mtime              SHA-256
+gw_mont_pipeline_check.log        10866  2026-09-27 15:58:41 4ac74b87f18b34a7324ad8e35b11f1d4b66074ce18e29ea52bcebedc234a7811
+gw_mont_pipeline_check_K6.log      6093  2026-09-27 17:28:23 f0f3fe8f9c3dbb6ecbbd8eaa22c1c139151d7757859037bb2039b0111fb52f11
+gw_montgomery_100_200.log         20090  2026-09-27 15:34:28 a409d71ed5b2cef9cca729a6a5210d1b281503e2fff0ea09889ca5928c32ac75
+gw_montgomery_100_200_run2.log    10802  2026-09-27 17:41:07 15aa399d0991fdbf85898b6aafaf1afcca58552ba13656fe66e78a79888ef0c6
+gw_s2_diag_gue_fixture.log        10547  2026-09-27 18:33:24 ae3e63dd5eddb51d8eae6f528390bc3a80db6aab8a733d3c8285daa45ab3fe65
+gw_s2_ceiling_stage1.log           1488  2026-09-27 18:42:50 1428b0cbe5fcec1ce0af89fbebdd90995dd985c2bb1d54a69bcac589aec5b24d
+gw_s2_ceiling_fix1.log             1495  2026-09-27 18:47:16 d352f0c6b945f0dbfe0b8c0056caddbc553e086d50cf6ecff54f00d12e56fb4c
+gw_s2_ceiling_run3.log             5854  2026-09-27 19:08:26 b34d5663893c684452ec271d1829570443244878cab4a4ac54a9c242cb8f6362
+
+STATUS OF EACH LOG
+  gw_mont_pipeline_check.log       KEPT, not overwritten (older gate run).
+  gw_mont_pipeline_check_K6.log    Gate run: ALL OF K1..K6 SATISFIED.
+  gw_montgomery_100_200.log        RUN 1 -- RETRACTED (defect 15: the sigma_u
+                                   grid was vacuous). KEPT so the retraction
+                                   stays auditable.
+  gw_montgomery_100_200_run2.log   RUN 2 -- the audited analysis on real data.
+  gw_s2_diag_gue_fixture.log       12 p-values of the GUE fixture (the full
+                                   grid, not just the first verdict).
+  gw_s2_ceiling_stage1.log         FAILED diagnostic run (bug D1: IndexError).
+                                   KEPT as audit trail.
+  gw_s2_ceiling_fix1.log           FAILED diagnostic run (bug D3: NameError T0).
+                                   KEPT as audit trail.
+  gw_s2_ceiling_run3.log           FINAL ceiling result (965.1 s, seed 20260928).
+
+None of the above was overwritten or deleted during this session.
+
+================================================================================
+4. RUNTIME ENVIRONMENT
+================================================================================
+python     3.14.4          (C:\Python314\python.exe)
+numpy      2.5.2
+scipy      present (scipy.stats.norm used by unfold)
+mpmath     present (arb path)
+python-flint 0.9.0
+
+Tool status: python 3.14 + numpy + scipy were RUN.
+lean / coqc / isabelle / dkcheck / z3 / gcc were NOT RUN in this session.
+
+Third-party vendored source and its licence: see THIRD_PARTY_SOURCES.md
+(the only vendored file, source_arb_ldlt_certify.py, SHA-256
+b7fee730a83baedc860ca456547d2799ec10894a79edecc6d5612931b41509e3, MIT).
+
+================================================================================
+5. SCOPE LIMIT (read literally)
+================================================================================
+Nothing in this repository establishes the Riemann Hypothesis, Weil positivity,
+a prime-counting result, or a factorisation method. The S1/S2 statistics are
+statistics of ONE finite, deterministic, synthetic matrix. The upstream
+preprint disclaims all four.
+
+Known residuals carried into the freeze (reported, NOT repaired):
+  * defect 18  -- gate script closing sentence is broader than S1 supports.
+  * K5 row of GW_STATUS s7h.3 -- its recorded verdict is unreachable by the
+    current grabber; the supporting log was overwritten. Still unexplained.
+  * defect 19  -- chart T is unfolded in the log chart while the surrogate
+    reference is built in the linear chart; audited chart-T p-values are
+    therefore not exchangeable (measured false-reject 0.25% vs nominal 5%).
+  * repository-wide py_compile: 856 files, 853 OK, 3 FAIL.
+    STATUS: PRE-EXISTING, OUT-OF-SCOPE ISSUES.
+    Architect's decision, 2026-09-27: do NOT enter CTP Mode A/B to edit them;
+    no change is made to core/theorem_ingestion.py or to either
+    quran_toe_synthesis.py. The three files are outside GUINAND_WEIL
+    (core/theorem_ingestion.py:178 and two quran_toe_synthesis.py at :107) and
+    were not created by this session.
+    The GUINAND_WEIL verification chain itself compiles 100% clean, and that
+    is accepted as sufficient certification FOR THIS SCOPE.
+================================================================================

@@ -113,3 +113,41 @@ copies matches the canonical copies byte-for-byte.
 `TRACK_C.md` will document the Lean 4 / Z3 plan. **No proof assistant has been
 run on any claim in this repository.** The directory is created empty rather
 than omitted, so that an empty folder cannot be mistaken for a completed one.
+
+
+---
+
+## Postscript (2026-09-29) -- layout as actually published
+
+The tree above was written against the original *nested* proposal. The
+repository as published is **flat-root**: every file sits directly in the
+repository root, with no `src/`, `data/`, `logs/`, `proofs/`, `docs/` or
+`scripts/` directories. README path references were flattened to match
+(commit `8ec0745`); this file is corrected here rather than rewritten, so the
+original proposal stays auditable.
+
+Consequently the sentence "Every path below maps to a file that exists on disk
+today" no longer holds for the **directories** it names. The *files* it names
+all exist, in the root. `proofs/` never existed as a directory at all -- the
+statement that no proof assistant has been run still holds, and still applies.
+
+### Files added 2026-09-29 (OMEGA-CORE chain)
+
+| file | role |
+|---|---|
+| `OMEGA_CORE_CERTIFICATE.md` | matrix definition, zero-fudging architecture, the $N=400$ certificate, telemetry schema, byte-hash inventory |
+| `gw_omega_core_v2.py` | the engine: interval $LDL^T$, auto-escalation, three anomaly gates |
+| `gw_sysmon.ps1` | 60 s system telemetry + ALERT taxonomy (log-and-continue) |
+| `gw_watchdog.py` | 60 s liveness watcher against the JSON heartbeat |
+| `gw_launch_v2.ps1` | detached launcher |
+| `gw_check_refs.py` | static reference gate (pre-run) |
+| `gw_verify_results.py` | JSON invariant gate (post-run) |
+| `omega_core_v2_results.json` | the $N=400$ certificate |
+| `omega_core_v2_run.log` | forensic run log, VERDICT lines |
+| `omega_v2_sysmon.log`, `omega_core_v2_watchdog.log`, `omega_core_v2_heartbeat.json` | telemetry snapshot |
+| `*_FAILED_absbug_*` (5 files) | the failed run, kept as audit trail |
+| `smoke*` (6 files) | both smoke gates, green |
+
+`omega_v2_sysmon.log` and `omega_core_v2_watchdog.log` are **live logs**
+snapshotted while the $N=800$ target was still running; their hashes describe
+that instant, not a final state.

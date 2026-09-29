@@ -107,3 +107,168 @@ Known residuals carried into the freeze (reported, NOT repaired):
     The GUINAND_WEIL verification chain itself compiles 100% clean, and that
     is accepted as sufficient certification FOR THIS SCOPE.
 ================================================================================
+
+
+================================================================================
+6. OMEGA-CORE FALSIFICATION ENGINE v2  (appended 2026-09-29)
+================================================================================
+Scope     : the arb-native interval-LDL^T chain and its N=400 certificate.
+            Sections 1-5 above cover the OPSI (d) chain (2026-09-27) and are
+            untouched.  This section covers work done 2026-09-28/29.
+Snapshot  : 2026-09-29 15:19:49 local.
+Note      : omega_v2_sysmon.log and omega_core_v2_watchdog.log are LIVE logs
+            captured as a snapshot while the N=800 target was still running;
+            their hashes describe that instant, not a final state.
+            omega_core_v2_run.log was verified byte-identical to the running
+            process's own file at snapshot time (C4714253...8756B on both sides).
+
+6.1 ENGINE AND INSTRUMENTATION
+file                        bytes   SHA-256
+gw_omega_core_v2.py         24981   cf21900937dbc4c47e7169f46d32638bee9c14ad80ed85d8ae53b8c9b0f74d0d
+gw_sysmon.ps1                5048   bd93a6c2f8ecee9ac8f5b630a82cb5b6ae0d0e1f3993e0ae18594cc3779e1f2e
+gw_watchdog.py               5398   670b582ca18c1673cabd86d8cb4e47e57ce76c7d2aeec7cd697cec689a832d11
+gw_launch_v2.ps1             2300   420e25078f75e61cb20a877fd2718d618a2db50c62f43090c2c84633a2754e2b
+gw_check_refs.py             1729   428117a9acbaef4aa66c38243210c55f200b0713c139ddca5be78aa3ff294454
+gw_verify_results.py         4561   02bdae10f1c644195a17e1f7cc942a6fee17f58a6c08c5ad47374b5362da1a60
+
+  gw_omega_core_v2.py    : the engine.  certified_ldlt_with_L (interval LDL^T),
+                           the auto-escalation loop, and the three anomaly gates
+                           (n_neg>0 / asymmetry / radius>1e-50).
+  gw_sysmon.ps1          : 60 s system telemetry (ram/commit/disk/ac/batt/alive/
+                           pid/priv/cpu/stage) + ALERT taxonomy.  LOG-AND-CONTINUE:
+                           it can never kill or restart the process it measures.
+  gw_watchdog.py         : 60 s liveness watcher against the JSON heartbeat.
+  gw_launch_v2.ps1       : detached launcher (Task Scheduler job object).
+  gw_check_refs.py       : static reference gate, run BEFORE any large sweep.
+  gw_verify_results.py   : JSON invariant gate, run BEFORE reporting any result.
+
+6.2 EVIDENCE -- TARGET (c,N) = (100,400)
+file                        bytes   SHA-256
+omega_core_v2_results.json    1971   5aaab0cfbf26f7fc5a3306bcd6a6e82e5482dad54a0a08d55ed4ebdcf22aa4f2
+omega_core_v2_run.log         3337   c4714253f841d3f16b5ce60c6f8382e9e1c823c63cf9bc0472ed94d5a278756b
+omega_core_v2_heartbeat.json   146   3181f896b13e7411c677042e935ab5e8aa415aa93b6143cd80bdadd377385c68
+
+VERDICT: VERIFIED POSITIVE DEFINITE.  n_pos=801, n_neg=0, 801/801 pivots
+certified, dim=801, prec=18000 after escalation from 9000 (undetermined pivot
+at index 723 on attempt 1 -- reported as unknown, NOT rounded to a sign).
+max_entry_radius   1.398551439204522661230545e-5266
+max_pivot_radius   1.135790614274549474670140e-2384
+symmetry_dev "0", symmetry_exact true, anomalies [], caveats [], non_result false
+lambda_min >= 6.74709239897214291717530665950e-509
+  (min_abs_pivot 2.014657282505926679349953e-112, sign "+",
+   ||L^-1||_F upper 1.727994119336448038542856e+198)
+peak_mb 2334.02368
+attempt 1: build 6191.3 s, ldlt 1171.8 s   (9000 bits)
+attempt 2: build 15939.7 s, ldlt 3614.3 s  (18000 bits); bound 2425.0 s
+inner sha256 of the result object: a38cb70e53f60ac21a66c23c83ef48fa75e57fbe14a8c9c58251df46856f18bb
+
+Reproducibility anchor: attempt 1 max_entry_radius 2.1547598290585434360e-2577
+is byte-identical to the value recorded by an earlier, independently
+terminated run of the same target at the same precision.
+
+6.3 TELEMETRY (live snapshot)
+file                        bytes   SHA-256
+omega_v2_sysmon.log          48685   691bb4bc4a94f9f4a8e741bfabdd0f5eb67c88e28d2d9a6a34defb07895f8c00
+omega_core_v2_watchdog.log  145997   f1c400ff6ce4aea37e45221658e4d0af881e760a1888f8d90c3a5dfd9b20a95d
+
+Reliability record at snapshot: 0 ALERT lines across the whole run,
+ACLineStatus=1, free physical RAM 9.5 GB, free commit 14.4 GB, CPU delta
++52..+59 s per 60 s sample.
+
+6.4 FAILED RUN, KEPT AS AUDIT TRAIL (never deleted)
+file                                                    bytes   SHA-256
+omega_core_v2_run_FAILED_absbug_20260929_011309.log       3312   bc88f1c03d016a1249e2906c794c07141665957d5699bd500919a407c80d2671
+omega_core_v2_results_FAILED_absbug_20260929_011342.json   180   ecba9166c19aca9ba10a3bbdb4d2330665ad7e92acc78a9179467bcfab9ed789
+omega_v2_stderr_FAILED_absbug_20260929_011342.txt          756   56b3b3d9c2e1f4e74f79b413bb111c01dc305b123afe1fae9750ecfffb8550ba
+omega_v2_stdout_FAILED_absbug_20260929_011342.txt         2055   a56284ea4dad3f166fde36b54aa353eea9726fe8a2bb554c955d31dfeaef7506
+omega_core_v2_heartbeat_DEAD_20260929_011342.json          147   8de9c502d933db12a0609b90d6701d1d3bf93b960594e48aa7b7db04ebbdd6a8
+
+Cause: a missing .abs() on the python-flint ball type raised AFTER a completed
+multi-hour build and destroyed it.  Kept so the failure stays auditable.
+
+6.5 SMOKE TESTS (both gates green after the five defect fixes)
+file                     bytes   SHA-256
+smoke.log                11674   14450c1694b2d56db4d8b1580c32e0700aa03c5423db11fea14f0a769bbff798
+smoke_escalate.log        9798   c5d4a7eccc3936dad3d1d06ffb3863e15a382a87c8ba09604f85b1b5b7e83aeb
+smoke_results.json        1633   d67b9065b78de1c55b440605b299e386eccdf49d1b4181ead1ea831ca0b00959
+smoke_escalate.json       1326   423f2e2a9907bc9d872742979d330c365f9cec1d39e9653e93c6d4c4e1543d37
+smoke_hb.json               99   51cf93e2035142d4485a160186e39fdab00d31d897bdebcff15e8a3b02007224
+smoke_escalate_hb.json      98   eebdaf0a9734268075e305ce6c1649e4b35ee4810a9a9b1ff21667a95a069990
+
+6.6 FIVE DEFECTS FOUND BY EXECUTION, FIXED BEFORE THE CERTIFICATE WAS TRUSTED
+  1. missing .abs() on the python-flint ball (destroyed a finished build).
+  2. symmetry test mathematically wrong: it compared A[i,j] == A[j,i], but on a
+     ball x-x = [0 +/- 2r] is never empty, so a PERFECTLY SYMMETRIC matrix would
+     have produced a false ASYMMETRIC signal -- a manufactured falsification.
+     Replaced by mutual containment (a.contains(b) and b.contains(a)).
+  3. Lf[i][i] left at zero when materialising L, making arb_mat.inv() report
+     "matrix is singular" and costing the whole lambda_min bound.
+  4. anomaly hard-coded False in the escalation-exhausted branch, with anomalies
+     overwritten by the undetermined message: a certified NEGATIVE pivot would
+     have been silently swallowed -- the worst failure mode a falsification
+     engine can have.  Fixed: anomalies is re-initialised per attempt and
+     anomaly = bool(anomalies); undetermined is reported separately through
+     non_result_reason.
+  5. missing non_result key in the certified branch of the result schema.
+
+6.7 python-flint 0.9.0 API FACTS, MEASURED (not assumed)
+  * no .abs() on the ball type; abs_lower() / abs_upper() are the rigorous
+    primitives (abs_lower returns 0 on a ball containing 0, so a bound degrades
+    instead of overclaiming).
+  * == and != both return False EVEN FOR A BALL COMPARED WITH ITSELF when the
+    radius is nonzero -- hence mutual containment rather than equality.
+  * .contains(), .upper(), .lower(), .sqrt(), .str(n, radius=False) and
+    arb_mat.inv() behave as expected; inv() requires a unit diagonal.
+
+6.8 STATUS OF THE SWEEP AT SNAPSHOT
+  (100,400) CERTIFIED.
+  (100,800) IN PROGRESS -- build_arb_tau, 9000 bits, attempt 1.  No result,
+            no verdict, and NOT counted toward any claim in this repository.
+An in-progress target is reported as in progress.  It is not evidence.
+
+6.9 DECLARED RESIDUAL -- LOCAL PATHS IN LOGS AND SCRIPTS (reported, NOT repaired)
+
+Several files in this repository contain the absolute Windows path
+C:\Users\usER\... and therefore disclose the local account name "usER".
+
+Where it occurs:
+  * PRE-EXISTING, public since 2026-09-27: gw_mont_pipeline_check.log,
+    gw_mont_pipeline_check_K6.log, gw_s2_ceiling_stage1.log,
+    gw_s2_ceiling_fix1.log, gw_s2_diag_gue_fixture.log -- traceback frames and
+    captured command lines.  Not introduced by the 2026-09-29 session.
+  * ADDED 2026-09-29: gw_sysmon.ps1, gw_launch_v2.ps1, gw_check_refs.py,
+    gw_verify_results.py (hard-coded working paths), plus smoke.log,
+    smoke_escalate.log and omega_v2_stderr_FAILED_absbug_*.txt.
+
+Why it is reported rather than repaired:
+  * The logs are forensic records. Rewriting a path inside a captured traceback
+    or command line would make the archive NOT what was executed, which
+    contradicts the purpose of shipping it.  Logs are never edited here.
+  * The scripts hard-code the path because that is how they were actually run.
+    Editing them would also break "as executed".
+  * Only CHECKSUM.sha256 was changed, because it is a manifest describing this
+    repository rather than a record of a run; its paths are now repository-relative.
+
+Status: ACCEPTED as a pre-existing, non-sensitive residual (a local account
+name, no credential of any kind; grep for credential patterns across all 97
+files returns zero matches).  Recorded here so a reader is not surprised.
+Removal, if ever wanted, must be a separate, disclosed decision -- silently
+rewriting these files would destroy the provenance this file exists to assert.
+
+================================================================================
+7. TOOL STATUS FOR THE OMEGA-CORE SESSION
+================================================================================
+python       3.14.4   (C:\Python314\python.exe)
+python-flint 0.9.0
+numpy        NOT USED by gw_omega_core_v2.py (zero-fudging rule: no numpy,
+             no scipy, no float64 in the certification path)
+mpmath       NOT USED on this route -- entries are built natively in Arb,
+             there is NO decimal hand-off.
+
+Tool status: python 3.14 + python-flint 0.9.0 were RUN.
+lean / coqc / isabelle / dkcheck / z3 / gcc were NOT RUN in this session
+-> the certificate is NOT proof-assistant verified.
+
+Method and formulae: see OMEGA_CORE_CERTIFICATE.md (matrix definition,
+zero-fudging architecture, the bound derivation, telemetry schema).
+================================================================================

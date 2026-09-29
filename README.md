@@ -250,6 +250,35 @@ build from **602.3 s to 2.6 s — a factor of 231.7** — while removing the def
 | source-anchored point | $(13,4)$: $9.67926186051\times10^{-15}$ | only source-anchored value |
 | Montgomery S2 Unfolding ($\sigma_u = 1.0$) | Power 94.4% ($N=401$), 92.7% ($N=801$), sep = 3.96 $\to$ 5.85 | `VALID OPERATIONAL DOMAIN` |
 | S2 Undersmoothing Bias ($\sigma_u \le 0.5$) | sep < 1 (empty decision window), invariant/worse at $N=801$ | `ESTIMATOR PROPERTY` (not $N$-ceiling) |
+| $\lambda_{\min}(Q_{100,400})$ lower bound | $+6.74709239897214291717530665950\times10^{-509}$ | `VERIFIED POSITIVE DEFINITE`, $n_+=801$, $n_-=0$ |
+| max entry radius at $(100,400)$ | $1.398551439204522661230545\times10^{-5266}$ | `PASS` (gate $10^{-50}$), `symmetry_exact = true` |
+
+### 6.1 The OMEGA-CORE chain (appended 2026-09-29)
+
+The table above is the OPSI (d) chain of 27 September. A second, independent
+chain was run after it and is now archived in this repository.
+
+`gw_omega_core_v2.py` builds every entry **natively in Arb** -- there is no
+`mpmath` decimal hand-off anywhere in the route -- and certifies inertia by
+**interval $LDL^T$ (Sylvester)** rather than by sampling an eigensolver. At
+$(c,N)=(100,400)$, $\dim = 801$:
+
+* attempt 1 (9000 bits) stopped at **pivot index 723** because that pivot ball
+  straddled zero. It was reported as **undetermined** and the precision was
+  doubled -- it was *not* rounded to a sign. This is zero-fudging visible in the
+  data.
+* attempt 2 (18000 bits) certified all 801 pivots: $n_+ = 801$, $n_- = 0$, so
+  the matrix is **positive definite**, with
+  $\lambda_{\min} \ge 6.74709239897214291717530665950\times10^{-509}$.
+
+Full derivation (matrix definition $A_{ij}=W_{02}-W_R-W_p$, the closed forms,
+the bound $\lambda_{\min}\ge \min|d_i|/\|L^{-1}\|_F^2$, the telemetry schema,
+the five defects found by execution, and the byte-hash inventory) is in
+**[`OMEGA_CORE_CERTIFICATE.md`](OMEGA_CORE_CERTIFICATE.md)**.
+
+**Status:** $(100,400)$ `CERTIFIED`. $(100,800)$ was `IN PROGRESS` at the
+archival snapshot and carries **no result and no verdict** -- it is not counted
+toward any claim here.
 
 ---
 
@@ -281,6 +310,32 @@ python gw_corrected_eig.py 100 40 180      # phase 6
 # identity gate
 python gw_final_gate.py 100 40 160 1000 224
 ```
+
+**OMEGA-CORE chain (added 2026-09-29).** Both gates below are mandatory
+*before* any large sweep, and the invariant check is mandatory *before*
+reporting any result:
+
+```bash
+# static reference gate
+python gw_check_refs.py
+
+# smoke: certified path (N=20 @ 9000 bits)
+python gw_omega_core_v2.py --c 100 --dims 20 --prec 9000 --out smoke_results.json
+
+# smoke: escalation-exhausted path (N=20 @ 200 -> 400 bits)
+python gw_omega_core_v2.py --c 100 --dims 20 --prec 200 --escalations 1 --out smoke_escalate.json
+
+# JSON invariant gate
+python gw_verify_results.py smoke_results.json
+
+# the certified target (allow escalation; expect ~11 h on a 4-core laptop)
+python gw_omega_core_v2.py --c 100 --dims 400 --prec 9000 --escalations 3 \
+    --out omega_core_v2_results.json
+```
+
+`source_arb_ldlt_certify.py` must be importable from its own directory. Note
+that `gw_qinf.py` line 47 sets `mp.mp.dps = 40` at module import time while
+`python-flint` uses `flint.ctx.prec` -- the two are not interchangeable.
 
 ---
 

@@ -26,13 +26,27 @@ Set-Location $dir
 # A previous heartbeat must not masquerade as a live one.
 Remove-Item $hb -ErrorAction SilentlyContinue
 
+# Parameters fixed by the Arsitek on 2026-09-30, after the 03:15 power cut
+# destroyed attempt 2 of N=800:
+#   --dims 800         N=400 is already VERIFIED POSITIVE DEFINITE and is
+#                      preserved in the GitHub snapshot (sha256 a38cb70e...
+#                      f18bb).  Rerunning it costs ~6 h and proves nothing new.
+#   --prec 18000       attempt 1 @9000 was a MEASURED non-result (undetermined
+#                      at pivot 1087/1601, evidence kept in omega_core_v2_run
+#                      .log and BRAIN).  Starting at 18000 goes straight to the
+#                      attempt being locked in and saves ~12 h of exposure.
+#   --escalations 0    there is no path to 36000 bits -- explicitly deferred.
+#   --ckpt             resumable build / LDL^T stages.  On D: because C: has
+#                      only ~11 GB free and the pagefile still needs room to
+#                      grow; D: has ~52 GB.
 $sweep = Start-Process -FilePath $py `
     -ArgumentList @(
         "gw_omega_core_v2.py",
         "--c", "100",
-        "--dims", "400", "800",
-        "--prec", "9000",
-        "--escalations", "3",
+        "--dims", "800",
+        "--prec", "18000",
+        "--escalations", "0",
+        "--ckpt", "D:\gw_ckpt",
         "--log", $log,
         "--heartbeat", $hb,
         "--out", $out

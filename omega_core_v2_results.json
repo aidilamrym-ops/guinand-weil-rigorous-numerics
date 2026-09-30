@@ -57,5 +57,20 @@
       "800 + 1.638719166685593608248050594068888532525e-26 1.135790614e-2384"
     ],
     "sha256": "a38cb70e53f60ac21a66c23c83ef48fa75e57fbe14a8c9c58251df46856f18bb"
+  },
+  {
+    "c": 100,
+    "N": 800,
+    "dim": 1601,
+    "prec": 9000,
+    "n_pos": 1087,
+    "n_neg": 0,
+    "undetermined_pivot": 1087,
+    "stage": "inertia_certified",
+    "max_pivot_radius": "1.079440741188274054583544e-46",
+    "max_entry_radius": "1.255267621735995634835091e-2520",
+    "symmetry_dev": "0",
+    "symmetry_exact": true,
+    "sha256": "95b329bc856c4ea97a4285a97481ee96b7f2fe015c1a34462c35240d57397c19"
   }
 ]

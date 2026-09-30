@@ -127,8 +127,16 @@ def arb_kappa(L):
     return (4 * arb.pi() * (eL - 1) / (eL + 1)).log() + arb.const_euler()
 
 
-def build_arb_tau(c, N, prec):
-    """tau = W02 - WR - Wp as an arb_mat, entries rigorous balls."""
+def build_arb_tau(c, N, prec, start_row=0, row_hook=None, prefill=None):
+    """tau = W02 - WR - Wp as an arb_mat, entries rigorous balls.
+
+    The three keyword arguments exist only so the sweep can be resumed after
+    an unclean power loss; they default to the original behaviour and change
+    no arithmetic.  `start_row` is the first row to compute, `prefill(A, DIM)`
+    is called once with the freshly allocated matrix (used to restore rows
+    that were already checkpointed), and `row_hook(i, A)` is called after row
+    i has been written to A (used to persist it).
+    """
     ctx.prec = prec
     S, CC, XC, L = arb_closed_forms(N, c, prec)
     PI = arb.pi()
@@ -148,7 +156,9 @@ def build_arb_tau(c, N, prec):
 
     DIM = 2 * N + 1
     A = arb_mat(DIM, DIM)
-    for i in range(DIM):
+    if prefill is not None:
+        prefill(A, DIM)
+    for i in range(start_row, DIM):
         n = i - N
         for j in range(i, DIM):
             m = j - N
@@ -170,6 +180,8 @@ def build_arb_tau(c, N, prec):
             val = W02 - WR - Wp
             A[i, j] = val
             A[j, i] = val
+        if row_hook is not None:
+            row_hook(i, A)
     return A, DIM
 
 

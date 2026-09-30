@@ -76,6 +76,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from flint import arb, arb_mat, ctx  # noqa: E402
 
 import source_arb_ldlt_certify as src  # noqa: E402
+import gw_ckpt as CK  # noqa: E402
 
 
 _LOG_FH = None
@@ -193,11 +194,22 @@ def symmetry_check(A, DIM):
     return at is None, worst, at
 
 
-def certified_ldlt_with_L(A, DIM, heartbeat=50):
+def certified_ldlt_with_L(A, DIM, heartbeat=50, start_pivot=0, prefill=None,
+                          pivot_hook=None, elapsed0=0.0):
     """Interval LDL^T returning L, d, counts and transcript.
 
     Same algorithm as source_arb_ldlt_certify.certified_inertia, but also
     materialises L and d so a rigorous lambda_min lower bound can be formed.
+
+    The four extra keyword arguments let an interrupted run resume after an
+    unclean power loss; they default to the original behaviour and change no
+    arithmetic.  `prefill(d, Lf)` restores already-checkpointed pivots,
+    `pivot_hook(i, d, Lf)` persists pivot i once it is complete, and
+    `elapsed0` is the time earlier sessions already spent.
+
+    Nothing outside the checkpoint is trusted on resume: n_pos, n_neg,
+    max_pivot_rad and the whole transcript are re-derived from the restored
+    pivots, so a resumed transcript is identical to a single-shot one.
     """
     d = [None] * DIM
     Lf = [[arb(0)] * DIM for _ in range(DIM)]
@@ -205,8 +217,27 @@ def certified_ldlt_with_L(A, DIM, heartbeat=50):
     n_neg = 0
     transcript = []
     max_pivot_rad = arb(0)
+    if prefill is not None:
+        prefill(d, Lf)
+    for i in range(start_pivot):
+        s = d[i]
+        r = s.rad()
+        if r > max_pivot_rad:
+            max_pivot_rad = r
+        if s > 0:
+            n_pos += 1
+            sign = "+"
+        elif s < 0:
+            n_neg += 1
+            sign = "-"
+        else:
+            # Never checkpointed (the run returns before the hook), but kept
+            # so the reconstruction cannot silently drop a line.
+            sign = "?"
+        transcript.append("%d %s %s %s" % (i, sign, s.mid().str(40, radius=False),
+                                           s.rad().str(10, radius=False)))
     t0 = time.time()
-    for i in range(DIM):
+    for i in range(start_pivot, DIM):
         s = A[i, i]
         for k in range(i):
             s = s - Lf[i][k] * Lf[i][k] * d[k]
@@ -231,7 +262,8 @@ def certified_ldlt_with_L(A, DIM, heartbeat=50):
                                               s.rad().str(10, radius=False)))
             return dict(n_pos=n_pos, n_neg=n_neg, undetermined=i,
                         transcript=transcript, L=Lf, d=d,
-                        max_pivot_rad=max_pivot_rad, elapsed=time.time() - t0)
+                        max_pivot_rad=max_pivot_rad,
+                        elapsed=elapsed0 + time.time() - t0)
         transcript.append("%d %s %s %s" % (i, sign, s.mid().str(40, radius=False),
                                            s.rad().str(10, radius=False)))
         for j in range(i + 1, DIM):
@@ -239,14 +271,17 @@ def certified_ldlt_with_L(A, DIM, heartbeat=50):
             for k in range(i):
                 t = t - Lf[j][k] * Lf[i][k] * d[k]
             Lf[j][i] = t / d[i]
+        if pivot_hook is not None:
+            pivot_hook(i, d, Lf)
         if heartbeat and (i + 1) % heartbeat == 0:
-            el = time.time() - t0
+            el = elapsed0 + time.time() - t0
             eta = el / (i + 1) * (DIM - i - 1)
             ckpt("  [ldlt] pivot %d/%d  elapsed=%.0fs  eta=%.0fs"
                  % (i + 1, DIM, el, eta))
     return dict(n_pos=n_pos, n_neg=n_neg, undetermined=None,
                 transcript=transcript, L=Lf, d=d,
-                max_pivot_rad=max_pivot_rad, elapsed=time.time() - t0)
+                max_pivot_rad=max_pivot_rad,
+                elapsed=elapsed0 + time.time() - t0)
 
 
 def lambda_min_lower_bound(res, DIM):
@@ -302,8 +337,41 @@ def sha256_of(obj):
                                      default=str).encode()).hexdigest()
 
 
-def run_target(c, N, prec, do_bound=True, max_prec_escalations=3, out_path=None):
-    """One (c, N) falsification attempt with dynamic precision scaling."""
+def _read_time(path):
+    """Cumulative seconds already spent on the current attempt, or 0.0."""
+    if not path:
+        return 0.0
+    try:
+        with open(path + ".time", "r", encoding="utf-8") as fh:
+            return float(fh.read().strip())
+    except (OSError, ValueError):
+        return 0.0
+
+
+def _write_time(path, seconds):
+    """Atomic replace, so a power cut mid-write cannot corrupt the counter."""
+    if not path:
+        return
+    try:
+        tmp = path + ".time.tmp"
+        with open(tmp, "w", encoding="utf-8") as fh:
+            fh.write("%.3f" % seconds)
+        os.replace(tmp, path + ".time")
+    except OSError:
+        pass                      # timing is reporting only; never fatal
+
+
+def run_target(c, N, prec, do_bound=True, max_prec_escalations=3,
+               out_path=None, ckpt_dir=None):
+    """One (c, N) falsification attempt with dynamic precision scaling.
+
+    When `ckpt_dir` is given, completed build rows and LDL^T pivots are
+    persisted as they finish (see gw_ckpt.py), so an unclean power loss costs
+    one checkpoint interval instead of a whole 24 h or 12 h stage.  The stage
+    timing for a resumed run is accumulated through the sidecar .time files
+    and reported as build_s_total / ldlt_s_total alongside this session's own
+    build_s / ldlt_s, so no figure is ever silently understated.
+    """
     dim = 2 * N + 1
     ckpt("")
     ckpt("=" * 96)
@@ -317,13 +385,72 @@ def run_target(c, N, prec, do_bound=True, max_prec_escalations=3, out_path=None)
         ckpt("\n--- attempt %d : prec = %d bits (~%d digits) ---"
              % (attempt, cur, cur // 3))
 
-        heartbeat("build_arb_tau:start", c=c, N=N, prec=cur, attempt=attempt)
+        # ---- resume state for this attempt --------------------------------
+        # The header carries c/N/prec/dim/phase, so a checkpoint written for a
+        # different precision, a different target or the other stage never
+        # matches: load() returns None and the stale file is rewritten.
+        b_hdr = {"c": c, "N": N, "prec": cur, "dim": dim, "phase": "build"}
+        l_hdr = {"c": c, "N": N, "prec": cur, "dim": dim, "phase": "ldlt"}
+        b_file = os.path.join(ckpt_dir, "build.ckpt") if ckpt_dir else None
+        l_file = os.path.join(ckpt_dir, "ldlt.ckpt") if ckpt_dir else None
+
+        got = CK.load(b_file, b_hdr, cur) if b_file else None
+        b_saved = got[1] if got else None
+        got = CK.load(l_file, l_hdr, cur) if l_file else None
+        l_saved = got[1] if got else None
+        if l_saved is not None and b_saved is None:
+            # LDL^T must run against the very matrix it was checkpointed on.
+            # Without the build checkpoint that identity cannot be shown, so
+            # restart the factorisation rather than mix two enclosures.
+            ckpt("  (ldlt checkpoint dropped: build checkpoint unavailable)")
+            l_saved = None
+
+        start_row = (max(b_saved) + 1) if b_saved else 0
+        build0 = _read_time(b_file) if b_saved else 0.0
+        build_writer = (CK.Checkpoint(b_file, b_hdr,
+                                      append=(b_saved is not None))
+                        if b_file else None)
+        build_prefill = None
+        if b_saved is not None:
+            def build_prefill(A, DIM, rows=b_saved):
+                for idx in sorted(rows):
+                    vals = rows[idx]
+                    for off, v in enumerate(vals):
+                        j = idx + off
+                        A[idx, j] = v          # upper triangle, as written
+                        A[j, idx] = v          # and its symmetric mirror
+        build_hook = None
+        if build_writer is not None and build_writer.usable:
+            build_sess = time.time()
+
+            def build_hook(i, A, w=build_writer, D=dim, e0=build0,
+                           f=build_sess, fp=b_file):
+                w.write_record(i, [A[i, j] for j in range(i, D)])
+                _write_time(fp, e0 + (time.time() - f))
+        if start_row:
+            ckpt("  RESUME build : %d / %d rows restored from checkpoint"
+                 % (start_row, dim))
+
+        heartbeat("build_arb_tau:start", c=c, N=N, prec=cur, attempt=attempt,
+                  resumed_rows=start_row)
         t0 = time.time()
-        A, DIM = src.build_arb_tau(c, N, cur)
+        A, DIM = src.build_arb_tau(c, N, cur, start_row=start_row,
+                                   row_hook=build_hook, prefill=build_prefill)
         t_build = time.time() - t0
-        ckpt("  build_arb_tau      : %.1f s" % t_build)
+        build_total = build0 + t_build
+        ckpt("  build_arb_tau      : %.1f s (session)   %.1f s (total)"
+             % (t_build, build_total))
+        if build_writer is not None:
+            build_writer.close()
+            _write_time(b_file, build_total)
+            if build_writer.broken:
+                ckpt("  (build checkpoint STOPPED: %s)" % build_writer.broken)
+            else:
+                ckpt("  build checkpoint   : rows recorded, %.2f GB on disk"
+                     % (os.path.getsize(b_file) / 1e9
+                        if os.path.isfile(b_file) else 0.0))
         heartbeat("build_arb_tau:done", c=c, N=N, prec=cur, attempt=attempt,
-                  build_s=round(t_build, 1))
+                  build_s=round(t_build, 1), build_s_total=round(build_total, 1))
 
         rad, rad_at = max_entry_radius(A, DIM)
         ckpt("  max entry radius   : %s  at %s"
@@ -349,15 +476,61 @@ def run_target(c, N, prec, do_bound=True, max_prec_escalations=3, out_path=None)
         sym_dev_str = (sym_dev.str(25, radius=False) if sym_dev is not None
                        else "NOT VERIFIED")
 
-        heartbeat("certified_ldlt:start", c=c, N=N, prec=cur, attempt=attempt)
-        res = certified_ldlt_with_L(A, DIM, heartbeat=max(1, DIM // 8))
-        ckpt("  certified_inertia  : %.1f s" % res["elapsed"])
+        # ---- resume state for the factorisation ---------------------------
+        start_pivot = (max(l_saved) + 1) if l_saved else 0
+        ldlt0 = _read_time(l_file) if l_saved else 0.0
+        ldlt_writer = (CK.Checkpoint(l_file, l_hdr,
+                                     append=(l_saved is not None))
+                       if l_file else None)
+        ldlt_prefill = None
+        if l_saved is not None:
+            def ldlt_prefill(d, Lf, rows=l_saved):
+                for idx in sorted(rows):
+                    vals = rows[idx]
+                    d[idx] = vals[0]               # the pivot itself
+                    Lf[idx][idx] = arb(1)          # L is unit lower triangular
+                    for k, v in enumerate(vals[1:]):
+                        Lf[idx + 1 + k][idx] = v   # column below that pivot
+        ldlt_hook = None
+        if ldlt_writer is not None and ldlt_writer.usable:
+            ldlt_sess = time.time()
+
+            def ldlt_hook(i, d, Lf, w=ldlt_writer, D=dim, e0=ldlt0,
+                          f=ldlt_sess, fp=l_file):
+                col = [d[i]]
+                col.extend(Lf[j][i] for j in range(i + 1, D))
+                if w.write_record(i, col):
+                    _write_time(fp, e0 + (time.time() - f))
+        if start_pivot:
+            ckpt("  RESUME LDL^T : %d / %d pivots restored from checkpoint"
+                 % (start_pivot, dim))
+
+        heartbeat("certified_ldlt:start", c=c, N=N, prec=cur, attempt=attempt,
+                  resumed_pivots=start_pivot)
+        res = certified_ldlt_with_L(A, DIM, heartbeat=max(1, DIM // 8),
+                                    start_pivot=start_pivot,
+                                    prefill=ldlt_prefill,
+                                    pivot_hook=ldlt_hook,
+                                    elapsed0=ldlt0)
+        ldlt_total = res["elapsed"]
+        if ldlt_writer is not None:
+            ldlt_writer.close()
+            _write_time(l_file, ldlt_total)
+            if ldlt_writer.broken:
+                ckpt("  (ldlt checkpoint STOPPED: %s)" % ldlt_writer.broken)
+            else:
+                ckpt("  ldlt checkpoint    : %.2f GB on disk"
+                     % (os.path.getsize(l_file) / 1e9
+                        if os.path.isfile(l_file) else 0.0))
+        ckpt("  certified_inertia  : %.1f s (session)   %.1f s (total)"
+             % (ldlt_total - ldlt0, ldlt_total))
         ckpt("  n_pos=%d  n_neg=%d  undetermined_pivot=%s  max_pivot_rad=%s"
              % (res["n_pos"], res["n_neg"], res["undetermined"],
                 res["max_pivot_rad"].str(14, radius=False)))
         heartbeat("certified_ldlt:done", c=c, N=N, prec=cur, attempt=attempt,
                   n_pos=res["n_pos"], n_neg=res["n_neg"],
-                  undetermined=res["undetermined"])
+                  undetermined=res["undetermined"],
+                  ldlt_s_total=round(ldlt_total, 1))
 
         # Save the inertia certificate BEFORE the lambda_min bound.  The bound
         # runs flint arb_mat.inv, which is the heaviest and most interruptible
@@ -380,8 +553,17 @@ def run_target(c, N, prec, do_bound=True, max_prec_escalations=3, out_path=None)
                 ckpt("  (partial save failed: %r)" % exc)
 
         attempts.append({
-            "attempt": attempt, "prec": cur, "build_s": round(t_build, 1),
-            "ldlt_s": round(res["elapsed"], 1), "n_pos": res["n_pos"],
+            "attempt": attempt, "prec": cur,
+            "build_s": round(t_build, 1),
+            "build_s_total": round(build_total, 1),
+            "ldlt_s": round(ldlt_total - ldlt0, 1),
+            "ldlt_s_total": round(ldlt_total, 1),
+            # build_s/ldlt_s measure THIS process only.  These say how much of
+            # the stage was restored from disk instead of recomputed, so no
+            # timing figure is ever silently understated.
+            "resumed_rows": start_row,
+            "resumed_pivots": start_pivot,
+            "n_pos": res["n_pos"],
             "n_neg": res["n_neg"], "undetermined_pivot": res["undetermined"],
             "max_entry_radius": rad.str(20, radius=False),
             "max_pivot_radius": res["max_pivot_rad"].str(20, radius=False),
@@ -492,6 +674,10 @@ def main():
                          "survives harness shell teardown)")
     ap.add_argument("--heartbeat", type=str, default=None,
                     help="liveness marker file for an external watchdog")
+    ap.add_argument("--ckpt", type=str, default=None,
+                    help="directory for resumable build/LDL^T checkpoints; "
+                         "an unclean power loss then costs one checkpoint "
+                         "interval instead of the whole stage")
     args = ap.parse_args()
 
     global _LOG_FH, _HEARTBEAT
@@ -499,11 +685,21 @@ def main():
     if args.log:
         _LOG_FH = open(args.log, "a", encoding="utf-8")
 
+    if args.ckpt:
+        try:
+            os.makedirs(args.ckpt, exist_ok=True)
+        except OSError as exc:
+            ckpt("FATAL: checkpoint directory %r unusable: %r"
+                 % (args.ckpt, exc))
+            return 2
+
     ckpt("#" * 96)
     ckpt("# OMEGA-CORE Falsification Engine v2  (arb-native LDL^T route)")
     ckpt("# c=%d  dims=%s  start_prec=%d  escalations=%d  bound=%s"
          % (args.c, args.dims, args.prec, args.escalations,
             "off" if args.skip_bound else "on"))
+    ckpt("# checkpoint: %s" % (args.ckpt or "OFF (a power cut loses all "
+                                "work done so far)"))
     ckpt("#" * 96)
     ckpt("")
     ckpt("CAVEAT that must travel with every number below:")
@@ -525,7 +721,8 @@ def main():
             r = run_target(args.c, N, args.prec,
                            do_bound=not args.skip_bound,
                            max_prec_escalations=args.escalations,
-                           out_path=args.out)
+                           out_path=args.out,
+                           ckpt_dir=args.ckpt)
         except KeyboardInterrupt:
             ckpt("\n*** INTERRUPTED at N=%d -- saving what is proven so far ***" % N)
             r = {"c": args.c, "N": N, "error": "KeyboardInterrupt",

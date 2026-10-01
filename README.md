@@ -193,7 +193,10 @@ lean / coqc / isabelle / dkcheck / z3 / gcc        NOT RUN
 
 ### 4.1 Track C — Lean 4 / Z3 integration: **NOT STARTED**
 
-Formalisation is planned and scoped in `proofs/TRACK_C.md`. **No Lean, Coq,
+Formalisation remains **planned only**. `REPO_STRUCTURE.md` reserved a
+`proofs/TRACK_C.md` plan file; **neither that file nor the `proofs/`
+directory was ever created** (recorded in the postscript of that file as
+*promised and not produced*). **No Lean, Coq,
 Isabelle or Z3 artefact has been produced, and no claim here is machine-checked
 by a proof assistant.** `flint`'s interval arithmetic is an automatic numerics
 tool, not a proof assistant; describing it as such would be a category error.

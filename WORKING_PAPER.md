@@ -533,8 +533,8 @@ instruction.
 2. `python-flint 0.9.0` — Ball arithmetic (`flint.arb`, `flint.arb_mat`,
    `acb_mat.eig`).
 3. `mpmath` — arbitrary-precision decimal arithmetic.
-4. Repository record: `logs/GW_STATUS_2026-09-26.md`, §7, §7a (retracted),
-   §7b, §7c.
+4. Repository record: `GW_STATUS_2026-09-26.md`, §7, §7a (retracted),
+   §7b, §7c; operational record for 2026-09-30 → 2026-10-01 in §10.
 
 ---
 
@@ -542,12 +542,15 @@ instruction.
 
 | file | contents |
 |---|---|
-| `logs/GW_STATUS_2026-09-26.md` | canonical status report, all diagnostics |
-| `docs/RETRACTIONS.md` | the eight retracted claims, preserved |
-| `docs/EPISTEMIC_RULES.md` | R1–R3 and the declared deviation |
-| `docs/API_AUDIT.md` | `flint 0.9.0` capability matrix |
-| `src/certified/` | A1 and A2 scripts as executed |
+| `GW_STATUS_2026-09-26.md` | canonical status report, all diagnostics (§2.4 retraction table, §7a–§7h, §10 operational record) |
+| `OMEGA_CORE_CERTIFICATE.md` | interval $LDL^T$ chain, $N=400$ and $N=800$ certificates |
+| `gw_arb_sweep.py`, `gw_arb_measured.py` | A1 and A2 scripts as executed (flat root) |
 | `REPO_STRUCTURE.md` | directory schema and inventory |
+
+The supplementary documents `RETRACTIONS.md`, `EPISTEMIC_RULES.md` and
+`API_AUDIT.md` named in earlier drafts of this table **were never produced**;
+their material lives in `GW_STATUS_2026-09-26.md` and `OMEGA_CORE_CERTIFICATE.md`
+5.1. The table above lists only files that exist.
 
 ---
 

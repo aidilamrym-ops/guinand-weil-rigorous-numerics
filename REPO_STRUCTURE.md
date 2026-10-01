@@ -4,7 +4,9 @@
 **Author:** Muhammad Aidil Amry · ORCID 0009-0002-9718-9710
 **Affiliation:** Independent Researcher | South Sulawesi, Indonesia
 
-Target repository: `omega-guinand-weil` (new GitHub repository, public).
+Target repository: `aidilamrym-ops/guinand-weil-rigorous-numerics` (public).
+`omega-guinand-weil` was the working title used when this schema was drafted;
+the repository was published under the name above.
 
 Every path below maps to a file that **exists on disk today**. Nothing is
 listed that has not been produced by an executed run.
@@ -108,11 +110,19 @@ omega-guinand-weil/
 All 30 `gw_*.py` plus both probes pass `py_compile`. SHA256 of the working
 copies matches the canonical copies byte-for-byte.
 
-## What goes in `proofs/` and why it is empty
+> **Superseded by the current inventory in the postscript below (2026-10-02).**
+> This table is the 2026-09-29 proposal state and is deliberately left
+> unedited; the counts, the file sizes and the `data/` layout it states no
+> longer describe the published repository.
 
-`TRACK_C.md` will document the Lean 4 / Z3 plan. **No proof assistant has been
-run on any claim in this repository.** The directory is created empty rather
-than omitted, so that an empty folder cannot be mistaken for a completed one.
+## What goes in `proofs/` -- reserved, never created
+
+The proposal reserved a `proofs/` directory whose only content would have
+been `TRACK_C.md`, the Lean 4 / Z3 integration plan. **That directory was
+never created and `TRACK_C.md` was never written.** **No proof assistant has
+been run on any claim in this repository.** The reasoning behind an empty
+directory -- that an empty folder must not be mistakable for a completed one
+-- is honoured by saying this outright instead of shipping a placeholder.
 
 
 ---
@@ -127,9 +137,19 @@ repository root, with no `src/`, `data/`, `logs/`, `proofs/`, `docs/` or
 original proposal stays auditable.
 
 Consequently the sentence "Every path below maps to a file that exists on disk
-today" no longer holds for the **directories** it names. The *files* it names
-all exist, in the root. `proofs/` never existed as a directory at all -- the
-statement that no proof assistant has been run still holds, and still applies.
+today" no longer holds for the **directories** it names. It also no longer
+holds for **six files** the tree above lists, none of which was ever produced:
+
+| promised in the tree | status |
+|---|---|
+| `docs/EPISTEMIC_RULES.md`, `docs/RETRACTIONS.md`, `docs/API_AUDIT.md`, `docs/IDENTITY_DEPTHS.md` | **never written** -- the material they would hold is inside `GW_STATUS_2026-09-26.md` (§2 rules, §7c/§7h retraction and defect tables, the `flint` 0.9.0 API facts) and `OMEGA_CORE_CERTIFICATE.md` 5.1 |
+| `data/README.md`, `logs/run/` | **never created** -- captured stdout is shipped flat, under its own file names |
+| `data/gw_matrix_100_40_dps180.json` | **never shipped** -- README §7 states the dps-180/260 inputs of record are not in this repository; the shipped matrix is `gw_matrix_100_200_dps400.json` in the root |
+
+They are recorded here as *promised and not produced* rather than silently
+dropped, so a reader can tell the difference between a missing document and a
+forgotten one. `proofs/` never existed as a directory at all -- the statement
+that no proof assistant has been run still holds, and still applies.
 
 ### Files added 2026-09-29 (OMEGA-CORE chain)
 
@@ -187,3 +207,26 @@ Deliberately **not** shipped from the working folder: `gw_omega_core.py` (v1
 engine, superseded by `gw_omega_core_v2.py` and referenced nowhere in this
 repository), `*.bak_*` CTP backups, and `task_backup_*.xml` (machine-local
 scheduled-task export).
+
+### Current inventory (measured 2026-10-02)
+
+Counted from `git ls-files` on the published tree; supersedes the proposal
+table above, which is left untouched as the 2026-09-29 record.
+
+| category | count |
+|---|---:|
+| tracked files (manifest covers 106 + `CHECKSUM.sha256` itself) | **107** |
+| `*.py` -- all pass `py_compile`, 0 failures | **51** |
+| `gw_*.py` | 47 |
+| `probe_*.py` | 2 |
+| other `*.py` (`source_arb_ldlt_certify.py`, `update_registry.py`) | 2 |
+| `*.md` | 10 |
+| `*.log` (forensic run logs, shipped on purpose) | 19 |
+| `*.json` | 12 |
+| `*.ps1` | 2 |
+| working-tree size | 64.56 MB (67,700,404 bytes) |
+
+Verification re-run on this date: `python gw_check_refs.py`,
+`python gw_verify_results.py`, `python gw_verify_production.py` -- **all exit
+0**; `CHECKSUM.sha256` re-verified against every tracked file -- **0 hash or
+size mismatches**.

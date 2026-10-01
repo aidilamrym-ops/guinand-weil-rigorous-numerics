@@ -29,8 +29,11 @@ Remove-Item $hb -ErrorAction SilentlyContinue
 # Parameters fixed by the Arsitek on 2026-09-30, after the 03:15 power cut
 # destroyed attempt 2 of N=800:
 #   --dims 800         N=400 is already VERIFIED POSITIVE DEFINITE and is
-#                      preserved in the GitHub snapshot (sha256 a38cb70e...
-#                      f18bb).  Rerunning it costs ~6 h and proves nothing new.
+#                      preserved in this repository's history: commit
+#                      e65319d (blob 30ca1467), omega_core_v2_results.json
+#                      sha256 5aaab0cfbf26f7fc5a3306bcd6a6e82e5482dad54a0a08d55ed4ebdcf22aa4f2,
+#                      1971 B, identical to certificate section 6.2.
+#                      Rerunning it costs ~6 h and proves nothing new.
 #   --prec 18000       attempt 1 @9000 was a MEASURED non-result (undetermined
 #                      at pivot 1087/1601, evidence kept in omega_core_v2_run
 #                      .log and BRAIN).  Starting at 18000 goes straight to the

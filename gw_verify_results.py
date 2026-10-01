@@ -5,13 +5,18 @@ and fails loudly on any invariant break, so a schema regression cannot pass
 just because the summary table still printed something plausible.
 """
 import json
+import os
 import sys
 
+# Fixture paths default to this script's own directory, so a fresh clone runs
+# from any working directory.  GW_FIXTURE_DIR overrides the default (an
+# environment variable, not argv, because gw_verify_production.py imports this
+# module and owns argv itself).
+BASE = os.environ.get("GW_FIXTURE_DIR") or os.path.dirname(os.path.abspath(__file__))
+
 CASES = [
-    (r"C:\Users\usER\oracle-toe\GUINAND_WEIL\smoke_results.json",
-     "certified"),
-    (r"C:\Users\usER\oracle-toe\GUINAND_WEIL\smoke_escalate.json",
-     "escalation_exhausted"),
+    (os.path.join(BASE, "smoke_results.json"), "certified"),
+    (os.path.join(BASE, "smoke_escalate.json"), "escalation_exhausted"),
 ]
 REQUIRED = ["c", "N", "dim", "prec", "attempts", "n_pos", "n_neg",
             "max_entry_radius", "max_pivot_radius", "symmetry_dev",

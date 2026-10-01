@@ -236,34 +236,50 @@ smoke_escalate_hb.json      98   eebdaf0a9734268075e305ce6c1649e4b35ee4810a9a9b1
    That launch terminated as a measured non-result -- undetermined at pivot
    1087/1601 -- and stays in the run log as evidence, never as a result.)
 
-6.9 DECLARED RESIDUAL -- LOCAL PATHS IN LOGS AND SCRIPTS (reported, NOT repaired)
+6.9 DECLARED RESIDUAL -- LOCAL PATHS IN LOGS AND SCRIPTS
+    (reported; gates repaired 2026-10-01 with disclosure, logs untouched)
 
 Several files in this repository contain the absolute Windows path
 C:\Users\usER\... and therefore disclose the local account name "usER".
 
-Where it occurs:
+Where it still occurs:
   * PRE-EXISTING, public since 2026-09-27: gw_mont_pipeline_check.log,
     gw_mont_pipeline_check_K6.log, gw_s2_ceiling_stage1.log,
     gw_s2_ceiling_fix1.log, gw_s2_diag_gue_fixture.log -- traceback frames and
     captured command lines.  Not introduced by the 2026-09-29 session.
-  * ADDED 2026-09-29: gw_sysmon.ps1, gw_launch_v2.ps1, gw_check_refs.py,
-    gw_verify_results.py (hard-coded working paths), plus smoke.log,
-    smoke_escalate.log and omega_v2_stderr_FAILED_absbug_*.txt.
+  * OPERATIONAL SCRIPTS: gw_sysmon.ps1, gw_launch_v2.ps1 (interpreter path,
+    source directory, checkpoint directory D:\gw_ckpt), update_registry.py
+    (docstring), plus smoke.log, smoke_escalate.log and
+    omega_v2_stderr_FAILED_absbug_*.txt (forensic captures).
 
-Why it is reported rather than repaired:
+Repaired 2026-10-01 (disclosed, behavior-preserving):
+  * gw_check_refs.py, gw_verify_results.py and gw_verify_production.py no
+    longer hard-code C:\... -- defaults now resolve relative to each script's
+    own directory, so a fresh clone runs from any working directory
+    (overrides: argv[1] for the first and third, GW_FIXTURE_DIR for the
+    second).  Baseline runs BEFORE the edit and reruns AFTER it both PASS
+    with exit 0 on the same fixtures; the checks performed are unchanged.
+  * gw_launch_v2.ps1 comment only: the cited "GitHub snapshot (sha256
+    a38cb70e...f18bb)" pointed to a commit that exists nowhere (404 on the
+    remote, unknown in local history) and was corrected to the commit that
+    verifiably holds the N=400 record: e65319d, blob 30ca1467, file sha256
+    5aaab0cf... (= certificate section 6.2).  The argument list that was
+    executed is unchanged.
+
+Why the logs remain unrepaired:
   * The logs are forensic records. Rewriting a path inside a captured traceback
     or command line would make the archive NOT what was executed, which
     contradicts the purpose of shipping it.  Logs are never edited here.
-  * The scripts hard-code the path because that is how they were actually run.
-    Editing them would also break "as executed".
+  * The operational scripts keep their executed paths for the same reason.
   * Only CHECKSUM.sha256 was changed, because it is a manifest describing this
-    repository rather than a record of a run; its paths are now repository-relative.
+    repository rather than a record of a run; its paths are repository-relative.
 
 Status: ACCEPTED as a pre-existing, non-sensitive residual (a local account
-name, no credential of any kind; grep for credential patterns across all 97
-files returns zero matches).  Recorded here so a reader is not surprised.
-Removal, if ever wanted, must be a separate, disclosed decision -- silently
-rewriting these files would destroy the provenance this file exists to assert.
+name, no credential of any kind; grep for credential patterns across all
+tracked files returns zero matches).  Recorded here so a reader is not
+surprised.  Removal, if ever wanted, must be a separate, disclosed decision --
+silently rewriting these files would destroy the provenance this file exists
+to assert.
 
 ================================================================================
 7. TOOL STATUS FOR THE OMEGA-CORE SESSION

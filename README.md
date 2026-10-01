@@ -358,6 +358,47 @@ python gw_omega_core_v2.py --c 100 --dims 400 --prec 9000 --escalations 3 \
 that `gw_qinf.py` line 47 sets `mp.mp.dps = 40` at module import time while
 `python-flint` uses `flint.ctx.prec` -- the two are not interchangeable.
 
+### 7.1 Tested environment and what reproduces identically
+
+Measured on the machine that produced the shipped results:
+
+| component | version |
+|---|---|
+| CPython | 3.14.4 (`C:\Python314\python.exe`) |
+| python-flint | 0.9.0 (`flint.arb` / `flint.arb_mat`, ball arithmetic) |
+| mpmath | 1.3.0 (arbitrary-precision decimals, gate parsing only) |
+| OS | Windows 10, PowerShell 5.1, 2C/4T laptop, ~13 GB RAM |
+
+**Reproduces identically** on any machine with that toolchain:
+
+* every verdict and certificate number -- `n_pos`, `n_neg`, `undetermined`,
+  `symmetry_dev = "0"`, the anomaly/caveat lists, and the bound string
+  `8.67526098867855342892890992571e-2877` -- is a function of the Arb
+  interval enclosures, which contain the truth by construction;
+* all three gates exit 0 on the shipped fixtures and the shipped production
+  row: `python gw_check_refs.py`, `python gw_verify_results.py`,
+  `python gw_verify_production.py` (seconds; run from any directory -- paths
+  resolve relative to each script file, since 2026-10-01).
+
+**May differ across environments:**
+
+* a different python-flint / Arb release can widen an enclosure, changing the
+  last printed digits of a bound. The verdict and the order of magnitude
+  cannot change -- an enclosure either contains a sign or it does not;
+* wall-clock times are machine-specific. The N=800 target consumed
+  133,591.3 s of phase time here (build 85,213.3 s + certified LDL^T
+  38,024.0 s + bound 10,354.0 s; peak 8,251.7 MB);
+* `gw_launch_v2.ps1`, `gw_sysmon.ps1` and `gw_watchdog.py` are Windows-only
+  operational telemetry scripts with machine-local paths; they are not needed
+  to reproduce any result. Gate overrides: `gw_verify_production.py` and
+  `gw_check_refs.py` accept an explicit file as `argv[1]`;
+  `gw_verify_results.py` reads `GW_FIXTURE_DIR` (default: the fixtures next
+  to the script).
+
+Fastest independent check after `git clone`: the three gates above, then the
+N=20 smoke runs in section 7. The N=400 target reproduces the certificate of
+section 6.1 (hours of runtime); the full N=800 target is a ~37 h rerun.
+
 ---
 
 ## 8. Primary Source

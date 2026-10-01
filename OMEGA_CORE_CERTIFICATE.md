@@ -438,17 +438,32 @@ status table in section 7 is final.
 | `source_arb_ldlt_certify.py` | 12863 | `33617ce64b0e052c07873b196a3744f2f5142a4aaf7b4cfbe9e3de43d17c27bb` |
 | `gw_sysmon.ps1` | 5048 | `bd93a6c2f8ecee9ac8f5b630a82cb5b6ae0d0e1f3993e0ae18594cc3779e1f2e` |
 | `gw_watchdog.py` | 5398 | `670b582ca18c1673cabd86d8cb4e47e57ce76c7d2aeec7cd697cec689a832d11` |
-| `gw_launch_v2.ps1` | 3252 | `7b729b0081fba3a920ee0f6c3f25692c043ac8d04a0a6b86bfa870a7a13822d4` |
+| `gw_launch_v2.ps1` | 3477 | `c043e6a47e13379bccb95072ba0cfcb506eb3d677404f03b847bf26daf258073` |
 | `gw_ckpt.py` | 8629 | `07fe8d710d00637d7d55460cd56af0ac852ad6e04c483fe1a04d31f691d046f0` |
-| `gw_check_refs.py` | 1729 | `428117a9acbaef4aa66c38243210c55f200b0713c139ddca5be78aa3ff294454` |
-| `gw_verify_results.py` | 4561 | `02bdae10f1c644195a17e1f7cc942a6fee17f58a6c08c5ad47374b5362da1a60` |
-| `gw_verify_production.py` | 2986 | `dbd48def7158bdbbefc1c6478cb28f4cb7472184f3f08246d0c1b45d528730c3` |
+| `gw_check_refs.py` | 1985 | `7edca0a3c4ce7981cf6e2a62e84339285eaae956ff3a151d011613e1c02d7bb3` |
+| `gw_verify_results.py` | 4871 | `78ffe1140c6942b431420a0c9e99e69de32a8143d34cb4c81b4e7284c6897d25` |
+| `gw_verify_production.py` | 3248 | `35ec5d33bc3cca16c71db98829669b04a04b6d19a73df45d9aaf870f3d5ec2d6` |
 
-The rows above are the versions that ran the certified $N=800$ sweep: the
-engine and launcher grew on 2026-09-30 (checkpoint/resume + heartbeat
-telemetry), and `gw_verify_production.py` was added 2026-10-01 as the
-production-row invariant gate -- it parses numbers with `mpmath` because
-float64 underflows a $10^{-2877}$ bound to `0.0`.
+Provenance of these rows:
+
+* `gw_omega_core_v2.py`, `source_arb_ldlt_certify.py`, `gw_ckpt.py`,
+  `gw_sysmon.ps1`, `gw_watchdog.py` are byte-identical to the versions that
+  ran the certified $N=800$ sweep (the engine grew on 2026-09-30:
+  checkpoint/resume + heartbeat telemetry).
+* `gw_launch_v2.ps1`: the executed argument list is unchanged; a
+  **comment-only** edit on 2026-10-01 replaced a cited archive reference
+  (`a38cb70e...f18bb`) that exists nowhere -- not on the remote (404), not in
+  local history -- with the commit that verifiably holds the $N=400$ record
+  (`e65319d`, blob `30ca1467`, file sha256 `5aaab0cf...a4f2` = section 6.2).
+* `gw_check_refs.py`, `gw_verify_results.py`, `gw_verify_production.py` were
+  made clone-portable on 2026-10-01: defaults resolve relative to each
+  script's own directory instead of `C:\Users\...` (overrides: `argv[1]` /
+  `GW_FIXTURE_DIR`). Baseline runs before the edit and reruns after it both
+  PASS with exit 0 on the same fixtures; the checks performed are unchanged.
+  Rationale and disclosure: PROVENANCE.txt section 6.9.
+* `gw_verify_production.py` (added 2026-10-01) parses numbers with `mpmath`
+  because float64 underflows a $10^{-2877}$ bound to `0.0`.
+
 `gw_check_refs.py` (static reference check) and `gw_verify_results.py` (JSON
 invariant check) are mandatory pre-run gates for any large sweep.
 
@@ -512,7 +527,7 @@ peak 8,251.7 MB.
 | `omega_v2_stdout.txt` | 3178 | `6f4674bcb7b3c38429cac63bd61b13bf0527780b393d9036ee586c1cbd546b60` |
 | `omega_core_v2_run.log` | 7177 | `7c402ca84eb8566f989e65e9ff484cb3d722e4089b2b73240bbe070a4c926ef3` |
 | `omega_core_v2_heartbeat.json` | 98 | `c63a0a4d0f10ec2429800c782790ec589693ad8f2cea7ce2c506fa2e58eb97da` |
-| `gw_verify_production.py` | 2986 | `dbd48def7158bdbbefc1c6478cb28f4cb7472184f3f08246d0c1b45d528730c3` |
+| `gw_verify_production.py` | 3248 | `35ec5d33bc3cca16c71db98829669b04a04b6d19a73df45d9aaf870f3d5ec2d6` |
 
 Measured values, read from `omega_core_v2_results.json` (not recomputed):
 

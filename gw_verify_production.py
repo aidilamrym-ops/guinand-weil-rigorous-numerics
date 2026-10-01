@@ -8,6 +8,7 @@ Exit 0 only when BOTH the smoke fixtures AND the production N=800 row
 satisfy every invariant.
 """
 import json
+import os
 import sys
 
 import mpmath as mp
@@ -19,7 +20,12 @@ import gw_verify_results as gv  # importing runs the fixture CASES (prints OK)
 # precision instead so the sign check is meaningful at the real scale.
 mp.mp.dps = 60
 
-PROD = r"C:\Users\usER\oracle-toe\GUINAND_WEIL\omega_core_v2_results.json"
+# Production result defaults to this script's own directory (a fresh clone
+# works from any working directory); pass an explicit file path as argv[1].
+PROD = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                    "omega_core_v2_results.json")
+if len(sys.argv) > 1:
+    PROD = os.path.abspath(sys.argv[1])
 
 rows = json.load(open(PROD, encoding="utf-8"))
 gv.check(len(rows) == 1, "production: expected exactly 1 row")

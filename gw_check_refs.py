@@ -4,10 +4,16 @@ Run it instead of inline -c strings: PowerShell quoting silently mangles
 Python one-liners that contain apostrophes, and a failed edit then looks
 like a passing one.
 """
+import os
 import py_compile
 import sys
 
-SRC = r"C:\Users\usER\oracle-toe\GUINAND_WEIL\gw_omega_core_v2.py"
+# Engine source defaults to this script's own directory so a fresh clone runs
+# from any working directory; pass an explicit file path as argv[1].
+SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                   "gw_omega_core_v2.py")
+if len(sys.argv) > 1:
+    SRC = os.path.abspath(sys.argv[1])
 lines = open(SRC, encoding="utf-8").read().splitlines()
 
 

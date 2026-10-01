@@ -1,9 +1,10 @@
 ================================================================================
 CHECKSUM.sha256 -- SHA-256 of every tracked file in this repository.
-Generated : 2026-09-29; regenerated 2026-10-01 after the N=800 result and the
-            certificate status sections landed, and after the three gates were
-            made clone-portable (OMEGA_CORE_CERTIFICATE.md 6.1/6.6,
-            PROVENANCE.txt 6.9).  The manifest excludes itself by construction.
+Generated : 2026-09-29; regenerated 2026-10-01/02 after the N=800 result, the
+            certificate status sections, the clone-portable gates and the
+            REPO_STRUCTURE postscript for the new file set landed
+            (OMEGA_CORE_CERTIFICATE.md 6.1/6.6, PROVENANCE.txt 6.8/6.9).
+            The manifest excludes itself by construction.
 Paths are REPOSITORY-RELATIVE and use forward slashes. The previous
 version of this file recorded absolute Windows paths (C:\Users\...),
 which leaked a local username into a public repository; that is fixed
@@ -109,7 +110,7 @@ SHA-256  97e65bb6704c3c789b762f754254ce35f45df83672096645a0d931c2fc2b5c9c       
 SHA-256  316dd5f726bbadfe53ebf63b4291e741d4beabc61ac3009c1dbfe69c136177c7       2609  probe_flint_eig.py
 SHA-256  cb6591d46490c3decdaa55647eaa8faba032a4bc480ba284a63eca1ea5a05646      19232  PROVENANCE.txt
 SHA-256  d70704370614e3bdc903ae4f1bcd1c75ab299996b89d648e1ae5cc7c627d5644      19695  README.md
-SHA-256  2fbca15fd7bb32d59f82bdf36d45a322c8409aae1785e45b5227700451467919       8576  REPO_STRUCTURE.md
+SHA-256  3ed31be2174e20c24a76be1fe13dc31b4245bf7b118fc61fd9768b0934466f3c      10801  REPO_STRUCTURE.md
 SHA-256  bc92865222c00223a793c814b47e12372da02530356f574e6e671d638bc1fcb4      11163  Rigorous Ball Arithmetic and Bandwidth-Calibrated Spectral Analysis of the Guinand-Weil Operator Framework.md
 SHA-256  14450c1694b2d56db4d8b1580c32e0700aa03c5423db11fea14f0a769bbff798      11674  smoke.log
 SHA-256  423f2e2a9907bc9d872742979d330c365f9cec1d39e9653e93c6d4c4e1543d37       1326  smoke_escalate.json

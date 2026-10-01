@@ -148,6 +148,42 @@ statement that no proof assistant has been run still holds, and still applies.
 | `*_FAILED_absbug_*` (5 files) | the failed run, kept as audit trail |
 | `smoke*` (6 files) | both smoke gates, green |
 
-`omega_v2_sysmon.log` and `omega_core_v2_watchdog.log` are **live logs**
-snapshotted while the $N=800$ target was still running; their hashes describe
-that instant, not a final state.
+`omega_v2_sysmon.log` and `omega_core_v2_watchdog.log` were **live logs**
+snapshotted while the $N=800$ target was still running; at the 2026-09-29 cut
+their hashes described that instant. The sweep has since completed and both
+logs are final (superseded entries below; authoritative bytes: certificate
+sections 6.3 and 6.6).
+
+### Files added 2026-09-30 / 2026-10-01 (checkpointing + the N=800 certificate)
+
+| file | role |
+|---|---|
+| `gw_ckpt.py` | build / $LDL^T$ checkpoint serializer used by `--ckpt` |
+| `gw_verify_production.py` | production-row invariant gate (extends the fixture gate to the shipped result row; parses with `mpmath` because float64 underflows a $10^{-2877}$ bound) |
+| `gw_ldlt_probe.py`, `ldlt_probe_100_100.json` | pivot-ball probe used to size the $N=800$ precision |
+| `omega_v2_stdout.txt` | captured verdict stream of the certified $N=800$ run |
+| `wd_selftest.log` | watchdog self-test record |
+| `Rigorous Ball Arithmetic and Bandwidth-Calibrated Spectral Analysis of the Guinand-Weil Operator Framework.md` | the working-paper manuscript |
+
+Supersessions inside existing files (authoritative detail: `OMEGA_CORE_CERTIFICATE.md` 6.1/6.6, `PROVENANCE.txt` 6.8/6.9):
+
+* `omega_core_v2_results.json` now holds the **$N=800$** record (1601/1601
+  certified, VERIFIED POSITIVE DEFINITE). The $N=400$ bytes of 2026-09-29
+  remain in this repository's git history (commit `e65319d`, file sha256
+  `5aaab0cf...`) -- the line above that calls the file "the $N=400$
+  certificate" describes the 2026-09-29 state.
+* `omega_core_v2_run.log`, `omega_core_v2_heartbeat.json` and the two
+  telemetry logs are the **final** state of the completed sweep
+  (2026-10-01 21:06), not the mid-run snapshot; final sizes and hashes:
+  certificate 6.3 / 6.6.
+* `gw_check_refs.py`, `gw_verify_results.py` and `gw_verify_production.py`
+  resolve paths relative to their own file since 2026-10-01 (clone-portable;
+  `argv[1]` / `GW_FIXTURE_DIR` overrides), and the `gw_launch_v2.ps1`
+  comment's archive reference was corrected to the verifiable commit
+  `e65319d`. Argument lists and executed runs are unchanged -- certificate
+  6.1, PROVENANCE 6.9.
+
+Deliberately **not** shipped from the working folder: `gw_omega_core.py` (v1
+engine, superseded by `gw_omega_core_v2.py` and referenced nowhere in this
+repository), `*.bak_*` CTP backups, and `task_backup_*.xml` (machine-local
+scheduled-task export).

@@ -425,20 +425,30 @@ Established by execution, because they are not obvious from the documentation:
 
 ## 6. Ship inventory
 
-Snapshot 2026-09-29 15:19:49. Live logs are a snapshot, not a final state --
-the $N=800$ sweep was still running and appending when these were taken.
+Snapshot 2026-09-29 15:19:49 was the original archival cut, taken while the
+$N=800$ sweep was still running. The sweep completed on 2026-10-01 21:06;
+section 6.6 carries its final bytes, section 6.3 the final telemetry, and the
+status table in section 7 is final.
 
 ### 6.1 Engine and instrumentation
 
 | file | bytes | SHA-256 |
 |---|---:|---|
-| `gw_omega_core_v2.py` | 24981 | `cf21900937dbc4c47e7169f46d32638bee9c14ad80ed85d8ae53b8c9b0f74d0d` |
+| `gw_omega_core_v2.py` | 34145 | `823de907bb53c42ae297a06a5f4549c48655e6fec87efea8c7a52eadbd98fb85` |
+| `source_arb_ldlt_certify.py` | 12863 | `33617ce64b0e052c07873b196a3744f2f5142a4aaf7b4cfbe9e3de43d17c27bb` |
 | `gw_sysmon.ps1` | 5048 | `bd93a6c2f8ecee9ac8f5b630a82cb5b6ae0d0e1f3993e0ae18594cc3779e1f2e` |
 | `gw_watchdog.py` | 5398 | `670b582ca18c1673cabd86d8cb4e47e57ce76c7d2aeec7cd697cec689a832d11` |
-| `gw_launch_v2.ps1` | 2300 | `420e25078f75e61cb20a877fd2718d618a2db50c62f43090c2c84633a2754e2b` |
+| `gw_launch_v2.ps1` | 3252 | `7b729b0081fba3a920ee0f6c3f25692c043ac8d04a0a6b86bfa870a7a13822d4` |
+| `gw_ckpt.py` | 8629 | `07fe8d710d00637d7d55460cd56af0ac852ad6e04c483fe1a04d31f691d046f0` |
 | `gw_check_refs.py` | 1729 | `428117a9acbaef4aa66c38243210c55f200b0713c139ddca5be78aa3ff294454` |
 | `gw_verify_results.py` | 4561 | `02bdae10f1c644195a17e1f7cc942a6fee17f58a6c08c5ad47374b5362da1a60` |
+| `gw_verify_production.py` | 2986 | `dbd48def7158bdbbefc1c6478cb28f4cb7472184f3f08246d0c1b45d528730c3` |
 
+The rows above are the versions that ran the certified $N=800$ sweep: the
+engine and launcher grew on 2026-09-30 (checkpoint/resume + heartbeat
+telemetry), and `gw_verify_production.py` was added 2026-10-01 as the
+production-row invariant gate -- it parses numbers with `mpmath` because
+float64 underflows a $10^{-2877}$ bound to `0.0`.
 `gw_check_refs.py` (static reference check) and `gw_verify_results.py` (JSON
 invariant check) are mandatory pre-run gates for any large sweep.
 
@@ -453,12 +463,20 @@ invariant check) are mandatory pre-run gates for any large sweep.
 `omega_core_v2_run.log` was verified **byte-identical** to the source process's
 own log at snapshot time (`C4714253...8756B` on both sides).
 
-### 6.3 Telemetry (live snapshot)
+These are the $N=400$ bytes; the working-tree file of the same name now holds
+the $N=800$ record (section 6.6). The $N=400$ record remains in this
+repository's git history.
+
+### 6.3 Telemetry (final, 2026-10-01)
 
 | file | bytes | SHA-256 |
 |---|---:|---|
-| `omega_v2_sysmon.log` | 48685 | `691bb4bc4a94f9f4a8e741bfabdd0f5eb67c88e28d2d9a6a34defb07895f8c00` |
-| `omega_core_v2_watchdog.log` | 145997 | `f1c400ff6ce4aea37e45221658e4d0af881e760a1888f8d90c3a5dfd9b20a95d` |
+| `omega_v2_sysmon.log` | 526181 | `95a4df23e50430e4e315b5cda08531b687dbdcf4e7d934c5e7d3db42910ef50a` |
+| `omega_core_v2_watchdog.log` | 593637 | `11526d8c1f5ff561954f869b482e9f4895ec455529ce68bde99c169090b4d440` |
+
+Final bytes: both monitors were stopped after the sweep exited (2026-10-01,
+22:12 local). They supersede the 2026-09-29 snapshot values (48,685 and
+145,997 bytes), which were taken mid-run.
 
 ### 6.4 Failed run, kept as audit trail
 
@@ -481,6 +499,41 @@ own log at snapshot time (`C4714253...8756B` on both sides).
 | `smoke_hb.json` | 99 | `51cf93e2035142d4485a160186e39fdab00d31d897bdebcff15e8a3b02007224` |
 | `smoke_escalate_hb.json` | 98 | `eebdaf0a9734268075e305ce6c1649e4b35ee4810a9a9b1ff21667a95a069990` |
 
+### 6.6 Evidence for $N=800$ (completed 2026-10-01 21:06)
+
+Executed argument list: `--c 100 --dims 800 --prec 18000 --escalations 0
+--ckpt D:\gw_ckpt` (attempt 1, resumed rows 0). Phase wall times: build
+85,213.3 s, certified $LDL^T$ 38,024.0 s, $\lambda_{\min}$ bound 10,354.0 s;
+peak 8,251.7 MB.
+
+| file | bytes | SHA-256 |
+|---|---:|---|
+| `omega_core_v2_results.json` | 1774 | `20ff0378bf72065c75ee8af2e873350d0dcd6801e6384db86eb14d7594119cbc` |
+| `omega_v2_stdout.txt` | 3178 | `6f4674bcb7b3c38429cac63bd61b13bf0527780b393d9036ee586c1cbd546b60` |
+| `omega_core_v2_run.log` | 7177 | `7c402ca84eb8566f989e65e9ff484cb3d722e4089b2b73240bbe070a4c926ef3` |
+| `omega_core_v2_heartbeat.json` | 98 | `c63a0a4d0f10ec2429800c782790ec589693ad8f2cea7ce2c506fa2e58eb97da` |
+| `gw_verify_production.py` | 2986 | `dbd48def7158bdbbefc1c6478cb28f4cb7472184f3f08246d0c1b45d528730c3` |
+
+Measured values, read from `omega_core_v2_results.json` (not recomputed):
+
+* $n_+ = 1601$, $n_- = 0$, undetermined = none -- 1601/1601 certified;
+* symmetry exact: mutual-containment deviation `0`, so the spectrum is
+  provably real;
+* max entry radius `6.053441192729382583443955e-5144`, max pivot radius
+  `7.424122759961235085328413e-803`;
+* $\min|d_i| = 2.317588938960509279827277e-120$ (pivot sign $+$),
+  $\|L^{-1}\|_F \le 1.634469911529859879792978e+1378$, hence
+  $\lambda_{\min} \ge 8.67526098867855342892890992571e-2877$
+  (the division $2.3176e{-}120 / (1.6345e{+}1378)^2$ checks by hand);
+* verdict **VERIFIED POSITIVE DEFINITE** ($n_+=1601$, $n_-=0$, 1601/1601
+  certified); `anomalies` empty, `caveats` empty;
+* internal record id `e42dad4b16dfe5a9e3e886b8f7ec77f1e5b982730b98a867583aaa1ffd2babb7`
+  (the `sha256` field inside the JSON);
+* gates: `gw_verify_results.py` PASS (fixtures) and `gw_verify_production.py`
+  PASS (production row), both exit 0. The production gate's first run failed
+  on float64 underflow of the $10^{-2877}$ bound -- a defect in the check,
+  not in the result -- and was fixed to parse with `mpmath`.
+
 ---
 
 ## 7. Status of the sweep
@@ -488,10 +541,13 @@ own log at snapshot time (`C4714253...8756B` on both sides).
 | target | status |
 |---|---|
 | $(c,N)=(100,400)$ | **CERTIFIED** -- positive definite, bound above |
-| $(c,N)=(100,800)$ | **IN PROGRESS** at snapshot time (`build_arb_tau`, 9000 bits, attempt 1) -- no result, no verdict |
+| $(c,N)=(100,800)$ | **CERTIFIED** (2026-10-01) -- positive definite, 1601/1601 certified, symmetry exact, bound in section 6.6 |
 
-An in-progress target is reported as in progress. It is not evidence, and it is
-not counted toward any claim in this document.
+Both targets carry results and verdicts and are counted toward the claims in
+this document. A target without a result is reported without one: the
+earlier snapshot recorded $(100,800)$ as in progress, and in progress was
+reported as in progress -- never as certified. An undetermined pivot is a
+non-result; it is never rounded to a sign.
 
 ---
 
@@ -503,9 +559,18 @@ python gw_check_refs.py
 python gw_omega_core_v2.py --c 100 --dims 20 --prec 9000 --out smoke_results.json
 python gw_verify_results.py smoke_results.json
 
-# the certified target
+# the certified target (N=400 chain of the 2026-09-29 snapshot)
 python gw_omega_core_v2.py --c 100 --dims 400 --prec 9000 --escalations 3 \
     --out omega_core_v2_results.json
+
+# the certified N=800 target exactly as executed 2026-09-30 -> 2026-10-01
+# (same argument list as gw_launch_v2.ps1)
+python gw_omega_core_v2.py --c 100 --dims 800 --prec 18000 --escalations 0 \
+    --ckpt D:\gw_ckpt --log omega_core_v2_run.log \
+    --heartbeat omega_core_v2_heartbeat.json --out omega_core_v2_results.json
+
+# production invariant gate (mandatory after any engine result)
+python gw_verify_production.py
 ```
 
 Note: `source_arb_ldlt_certify.py` must be importable from its own directory.
@@ -514,6 +579,8 @@ Line 47 of `gw_qinf.py` sets `mp.mp.dps = 40` at module import time, and
 
 ---
 
-*Generated for archival by the OMEGA-CORE session of 2026-09-29. Every number
-above was read from an executed run's output files; none was recomputed,
-rounded, or estimated for this document.*
+*Generated for archival by the OMEGA-CORE session of 2026-09-29; the status
+table, sections 6.1, 6.3, 6.6 and the $N=800$ reproduction line were updated
+2026-10-01 after the sweep completed. Every number above was read from an
+executed run's output files; none was recomputed, rounded, or estimated for
+this document.*

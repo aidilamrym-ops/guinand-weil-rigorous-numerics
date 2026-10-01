@@ -220,11 +220,21 @@ smoke_escalate_hb.json      98   eebdaf0a9734268075e305ce6c1649e4b35ee4810a9a9b1
   * .contains(), .upper(), .lower(), .sqrt(), .str(n, radius=False) and
     arb_mat.inv() behave as expected; inv() requires a unit diagonal.
 
-6.8 STATUS OF THE SWEEP AT SNAPSHOT
+6.8 STATUS OF THE SWEEP (final, 2026-10-01)
   (100,400) CERTIFIED.
-  (100,800) IN PROGRESS -- build_arb_tau, 9000 bits, attempt 1.  No result,
-            no verdict, and NOT counted toward any claim in this repository.
-An in-progress target is reported as in progress.  It is not evidence.
+  (100,800) CERTIFIED as of 2026-10-01 21:06 -- completed by the restart
+            locked on 2026-09-30 (18000 bits, escalations 0, attempt 1):
+            dim 1601, n_pos 1601, n_neg 0, undetermined none, symmetry
+            exact (dev 0), verdict VERIFIED POSITIVE DEFINITE, lambda_min >=
+            8.67526098867855342892890992571e-2877 = min|d_i| 2.3175889389605092798e-120
+            / ||L^-1||_F^2 with ||L^-1||_F 1.6344699115298598798e+1378.
+            Result record omega_core_v2_results.json (file sha256
+            20ff0378bf72065c75ee8af2e873350d0dcd6801e6384db86eb14d7594119cbc,
+            internal record e42dad4b16dfe5a9e3e886b8f7ec77f1e5b982730b98a867583aaa1ffd2babb7).
+            Gates gw_verify_results.py and gw_verify_production.py PASS, exit 0.
+  (The earlier snapshot note recorded the 9000-bit launch as IN PROGRESS.
+   That launch terminated as a measured non-result -- undetermined at pivot
+   1087/1601 -- and stays in the run log as evidence, never as a result.)
 
 6.9 DECLARED RESIDUAL -- LOCAL PATHS IN LOGS AND SCRIPTS (reported, NOT repaired)
 

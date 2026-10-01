@@ -271,14 +271,35 @@ $(c,N)=(100,400)$, $\dim = 801$:
   the matrix is **positive definite**, with
   $\lambda_{\min} \ge 6.74709239897214291717530665950\times10^{-509}$.
 
+The same engine closed $(c,N)=(100,800)$, $\dim = 1601$, on 2026-10-01:
+
+* the earlier 9000-bit launch terminated as a **measured non-result**
+  (undetermined at pivot 1087/1601) and was **not** rounded to a sign either;
+  after the 03:15 power cut of 2026-09-30 the restart parameters were locked
+  by the operator (`--prec 18000 --escalations 0`, see `gw_launch_v2.ps1`);
+* attempt 1 (18000 bits) certified **all 1601 pivots**: $n_+ = 1601$,
+  $n_- = 0$, undetermined = none, symmetry exact (mutual-containment
+  deviation $= 0$, so the spectrum is provably real) -- the matrix is
+  **positive definite**, with
+  $\lambda_{\min} \ge 8.67526098867855342892890992571\times10^{-2877}$
+  ($\min|d_i| = 2.3175889389605092798\times10^{-120}$ divided by
+  $\|L^{-1}\|_F^2$ with $\|L^{-1}\|_F \le 1.6344699115298598798\times10^{1378}$);
+* wall time: build 85,213.3 s + certified $LDL^T$ 38,024.0 s + bound
+  10,354.0 s (attempt 1, no escalation, peak 8,251.7 MB). Result record
+  `omega_core_v2_results.json` (sha256 `20ff0378...119cbc`, internal record
+  `e42dad4b...2babb7`), verdict line in `omega_v2_stdout.txt`; invariant gates
+  `gw_verify_results.py` (fixtures) and `gw_verify_production.py` (production
+  row) both PASS, exit 0.
+
 Full derivation (matrix definition $A_{ij}=W_{02}-W_R-W_p$, the closed forms,
 the bound $\lambda_{\min}\ge \min|d_i|/\|L^{-1}\|_F^2$, the telemetry schema,
 the five defects found by execution, and the byte-hash inventory) is in
 **[`OMEGA_CORE_CERTIFICATE.md`](OMEGA_CORE_CERTIFICATE.md)**.
 
-**Status:** $(100,400)$ `CERTIFIED`. $(100,800)$ was `IN PROGRESS` at the
-archival snapshot and carries **no result and no verdict** -- it is not counted
-toward any claim here.
+**Status:** $(100,400)$ `CERTIFIED`. $(100,800)$ `CERTIFIED` (2026-10-01,
+1601/1601 certified, verdict **VERIFIED POSITIVE DEFINITE**, bound above).
+Both targets carry results and verdicts and are counted toward the claims in
+this document.
 
 ---
 

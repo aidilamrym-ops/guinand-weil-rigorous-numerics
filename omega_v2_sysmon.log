@@ -3316,3 +3316,17 @@
 [2026-10-01 21:58:26] ALERT SWEEP-DEAD (proses hilang)  ram=11755MB commit=28075MB disk=7.9GB ac=1 priv=-1MB pid=2356 stage=sweep:complete/N/p/a
 [2026-10-01 21:59:26] ram=11765MB commit=28120MB disk=7.9GB ac=1 batt=0% alive=False pid=2356 priv=-1MB cpu=-1s stage=sweep:complete/N/p/a
 [2026-10-01 21:59:26] ALERT SWEEP-DEAD (proses hilang)  ram=11765MB commit=28120MB disk=7.9GB ac=1 priv=-1MB pid=2356 stage=sweep:complete/N/p/a
+[2026-10-01 22:00:26] ram=11673MB commit=28074MB disk=7.9GB ac=1 batt=0% alive=False pid=2356 priv=-1MB cpu=-1s stage=sweep:complete/N/p/a
+[2026-10-01 22:00:26] ALERT SWEEP-DEAD (proses hilang)  ram=11673MB commit=28074MB disk=7.9GB ac=1 priv=-1MB pid=2356 stage=sweep:complete/N/p/a
+[2026-10-01 22:01:26] ram=11642MB commit=27989MB disk=8GB ac=1 batt=0% alive=False pid=2356 priv=-1MB cpu=-1s stage=sweep:complete/N/p/a
+[2026-10-01 22:01:26] ALERT SWEEP-DEAD (proses hilang)  ram=11642MB commit=27989MB disk=8GB ac=1 priv=-1MB pid=2356 stage=sweep:complete/N/p/a
+[2026-10-01 22:02:26] ram=11252MB commit=27582MB disk=8GB ac=1 batt=0% alive=False pid=2356 priv=-1MB cpu=-1s stage=sweep:complete/N/p/a
+[2026-10-01 22:02:26] ALERT SWEEP-DEAD (proses hilang)  ram=11252MB commit=27582MB disk=8GB ac=1 priv=-1MB pid=2356 stage=sweep:complete/N/p/a
+[2026-10-01 22:03:26] ram=11222MB commit=27597MB disk=8GB ac=1 batt=0% alive=False pid=2356 priv=-1MB cpu=-1s stage=sweep:complete/N/p/a
+[2026-10-01 22:03:26] ALERT SWEEP-DEAD (proses hilang)  ram=11222MB commit=27597MB disk=8GB ac=1 priv=-1MB pid=2356 stage=sweep:complete/N/p/a
+[2026-10-01 22:04:26] ram=11223MB commit=27596MB disk=8GB ac=1 batt=0% alive=False pid=2356 priv=-1MB cpu=-1s stage=sweep:complete/N/p/a
+[2026-10-01 22:04:26] ALERT SWEEP-DEAD (proses hilang)  ram=11223MB commit=27596MB disk=8GB ac=1 priv=-1MB pid=2356 stage=sweep:complete/N/p/a
+[2026-10-01 22:05:27] ram=11262MB commit=27589MB disk=8GB ac=1 batt=0% alive=False pid=2356 priv=-1MB cpu=-1s stage=sweep:complete/N/p/a
+[2026-10-01 22:05:27] ALERT SWEEP-DEAD (proses hilang)  ram=11262MB commit=27589MB disk=8GB ac=1 priv=-1MB pid=2356 stage=sweep:complete/N/p/a
+[2026-10-01 22:06:27] ram=11244MB commit=27631MB disk=8GB ac=1 batt=0% alive=False pid=2356 priv=-1MB cpu=-1s stage=sweep:complete/N/p/a
+[2026-10-01 22:06:27] ALERT SWEEP-DEAD (proses hilang)  ram=11244MB commit=27631MB disk=8GB ac=1 priv=-1MB pid=2356 stage=sweep:complete/N/p/a

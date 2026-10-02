@@ -49,6 +49,7 @@ usage:
     python gw_opt_a_diff.py 100 200 400 2000 --load gw_matrix_100_200_dps400.json
 """
 
+import hashlib
 import importlib.util
 import sys
 import time
@@ -56,7 +57,18 @@ import time
 import mpmath as mp
 
 SRC_PATH = "source_arb_ldlt_certify.py"
-SRC_SHA256 = "b7fee730a83baedc860ca456547d2799ec10894a79edecc6d5612931b41509e3"
+# Two pinned copies of that file exist in this repository's history; see
+# THIRD_PARTY_SOURCES.md section 1 and OMEGA_CORE_CERTIFICATE.md section 1.
+# This script prints which one it is actually running against; the hard gate
+# (anything that is neither value fails) lives in gw_even_vs_src.py.
+SRC_SHA256_VERBATIM = (
+    "b7fee730a83baedc860ca456547d2799ec10894a79edecc6d5612931b41509e3",
+    "12256 bytes, git b76be0d, byte-identical to script_sha256 upstream",
+)
+SRC_SHA256_SHIPPED = (
+    "33617ce64b0e052c07873b196a3744f2f5142a4aaf7b4cfbe9e3de43d17c27bb",
+    "12863 bytes, git bfa40dc, the 2026-09-30 resume copy that ran N=800",
+)
 
 V1_REL = mp.mpf(10) ** -300
 V2_REL = mp.mpf(10) ** -6
@@ -102,7 +114,16 @@ def main(argv):
     ckpt("# (c, N, dps, prec) = (%d, %d, %d, %d)  dimension %d x %d"
          % (c, N, dps, prec, n, n))
     ckpt("# source: %s" % SRC_PATH)
-    ckpt("# source SHA256 must equal the certificate's script_sha256: %s" % SRC_SHA256)
+    digest = hashlib.sha256(open(SRC_PATH, "rb").read()).hexdigest()
+    if digest == SRC_SHA256_VERBATIM[0]:
+        note = "verbatim upstream copy (%s)" % SRC_SHA256_VERBATIM[1]
+    elif digest == SRC_SHA256_SHIPPED[0]:
+        note = "documented local extension: %s" % SRC_SHA256_SHIPPED[1]
+    else:
+        note = "*** NOT A PINNED COPY -- do NOT trust this run ***"
+    ckpt("# source sha256 = %s" % digest)
+    ckpt("#                 %s" % note)
+    ckpt("# byte-identity gate (fails on any third value): gw_even_vs_src.py")
     ckpt("#" * 96)
     ckpt("")
     ckpt("PRE-REGISTERED RULE:")

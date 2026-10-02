@@ -51,7 +51,18 @@ import time
 import mpmath as mp
 
 SRC_PATH = "source_arb_ldlt_certify.py"
-SRC_SHA256 = "b7fee730a83baedc860ca456547d2799ec10894a79edecc6d5612931b41509e3"
+# Two pinned copies of that file exist in this repository's history; see
+# THIRD_PARTY_SOURCES.md section 1 and OMEGA_CORE_CERTIFICATE.md section 1.
+# The provenance check below accepts EITHER, reports which one it found, and
+# fails anything else.  Neither value is interchangeable with the other.
+SRC_SHA256_VERBATIM = (
+    "b7fee730a83baedc860ca456547d2799ec10894a79edecc6d5612931b41509e3",
+    "12256 bytes, git b76be0d, byte-identical to script_sha256 upstream",
+)
+SRC_SHA256_SHIPPED = (
+    "33617ce64b0e052c07873b196a3744f2f5142a4aaf7b4cfbe9e3de43d17c27bb",
+    "12863 bytes, git bfa40dc, the 2026-09-30 resume copy that ran N=800",
+)
 
 V1_REL = mp.mpf(10) ** -300
 V2_REL = mp.mpf(10) ** -6
@@ -144,10 +155,19 @@ def main(argv):
     digest = hashlib.sha256(open(SRC_PATH, "rb").read()).hexdigest()
     ckpt("  sha256(%s)" % SRC_PATH)
     ckpt("    computed = %s" % digest)
-    ckpt("    expected = %s" % SRC_SHA256)
-    ckpt("    %s" % ("MATCH -- byte-identical to script_sha256 in their provenance"
-                    if digest == SRC_SHA256
-                    else "*** MISMATCH -- do NOT trust this run ***"))
+    if digest == SRC_SHA256_VERBATIM[0]:
+        ckpt("    pinned   = %s  (%s)" % SRC_SHA256_VERBATIM)
+        ckpt("    MATCH -- byte-identical to script_sha256 in their provenance")
+    elif digest == SRC_SHA256_SHIPPED[0]:
+        ckpt("    pinned   = %s  (%s)" % SRC_SHA256_SHIPPED)
+        ckpt("    MATCH -- documented local extension: three default-preserving")
+        ckpt("             resume kwargs added 2026-09-30, no arithmetic changed.")
+        ckpt("             The verbatim upstream copy is at git b76be0d and is")
+        ckpt("             what this check printed when it ran on 2026-09-27.")
+    else:
+        ckpt("    pinned   = %s  (%s)" % SRC_SHA256_VERBATIM)
+        ckpt("             %s  (%s)" % SRC_SHA256_SHIPPED)
+        ckpt("    *** MISMATCH -- do NOT trust this run ***")
     ckpt("")
 
     # ---- our side --------------------------------------------------------

@@ -314,11 +314,16 @@ What this affects, all of it recorded rather than repaired:
   * gw_omega_core_v2.py line 707 prints the ORIGINAL hash from a hard-coded
     string, so the caveat inside omega_core_v2_run.log and omega_v2_stdout.txt
     reports b7fee730... for the N=800 block too.  Logs are never edited.
-  * gw_even_vs_src.py lines 54/144-150 compare the on-disk hash against
-    b7fee730...; its shipped log gw_even_vs_src_100_200.log recorded MATCH on
-    2026-09-27 (true then).  A re-run today reports MISMATCH -- the check is
-    behaving correctly, and the mismatch is the disclosure.
-  * gw_opt_a_diff.py line 105 only prints the expected hash; it does not verify.
+  * gw_even_vs_src.py lines 54-64/154-172 compare the on-disk hash against
+    BOTH pinned values (b7fee730... verbatim, 33617ce6... shipped) and fail on
+    any third value.  Its shipped log gw_even_vs_src_100_200.log recorded
+    MATCH -- byte-identical on 2026-09-27 (true then); the rerun of 2026-10-02,
+    gw_even_vs_src_100_200_rerun_20261002.log (exit 0, 339 s), records
+    MATCH -- documented local extension and reproduces delta, delta_rel, the
+    median ratio and the V1 verdict identically to the 2026-09-29 log (only
+    wall-clock times differ).  Both logs shipped unedited.
+  * gw_opt_a_diff.py prints the hash it actually loaded and which pinned copy
+    it is, instead of asserting one hash in a header comment.
 
 Residual accepted as disclosed.  Repairing any of these silently would falsify
 either a log or a git history that already exists.

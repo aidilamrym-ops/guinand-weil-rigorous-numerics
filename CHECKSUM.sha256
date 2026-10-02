@@ -26,6 +26,18 @@ Generated : 2026-09-29; regenerated 2026-10-01 after the N=800 result and the
             the edited source package, scope statement) and PROVENANCE.txt
             (residual 6.10 and the updated tool status). No code, log, JSON
             or result file was altered by that pass.
+            Regenerated again later on 2026-10-02 after the source-hash gate
+            was made honest about the 2026-09-30 edit of the vendored source:
+            gw_even_vs_src.py and gw_opt_a_diff.py now pin BOTH copies of
+            source_arb_ldlt_certify.py (verbatim b7fee730... at git b76be0d,
+            shipped 33617ce6... since commit bfa40dc) and fail on any third
+            value, and gw_even_vs_src_100_200_rerun_20261002.log was added as
+            the rerun evidence (exit 0, same delta / delta_rel / V1 verdict as
+            the 2026-09-29 log, only wall-clock times differ).  THIRD_PARTY_
+            SOURCES.md, PROVENANCE.txt 6.10, GW_STATUS 7g.3 and section 10, and
+            certificate 6.1 record the same thing.  Entries 111 -> 112; two
+            .py gate scripts changed, no result file and no pre-existing log
+            was edited.
             The manifest excludes itself by construction.
 Paths are REPOSITORY-RELATIVE and use forward slashes. The previous
 version of this file recorded absolute Windows paths (C:\Users\...),
@@ -45,17 +57,17 @@ SHA-256  27d664062e73ffa752a8d5c3eb5f1426f9988761ccf5650bafde6e429a236c0f       
 SHA-256  8ad88f9099b331a9261a33e0acaa3bf4c2a89d0f292545eb8d7c735b9aba4771       1286  .gitignore
 SHA-256  222a713bd4620e2b7e86a350fb360e92a47de66b4b9a200815591bad39533fb7       1786  .zenodo.json
 SHA-256  5b76545a947a2ba99bda3c242ce32a94b214eec44ed6295518661d499e8f9798       2716  CITATION.cff
-SHA-256  40fe7de09f2a8469c2c751091ef0b933879eedefa6b07870dcf4fbbc420c5280     106837  GW_STATUS_2026-09-26.md
+SHA-256  4d0769f91d043ea351ca9bc1e13a960411cd3fc4c527f215f90ef2537128e407     108404  GW_STATUS_2026-09-26.md
 SHA-256  5ba17781fa76132afe026c3e8d28727fcc8b8e4d2831dd3693663014abcdf7ad       1656  LICENSE
 SHA-256  8d67e1d7e3d35ef784151c5dcd561e6324b425bf25e85598fb7e8d63b40e31c7       2813  LICENSE-DOCS.md
 SHA-256  b894aef6b08da29a68f63d00f7764a383122c309f09587d409abc5a525c36216       2363  LICENSING.md
 SHA-256  8894d24bee7107dee42ea2bcf3a6034323d1188872d41e43126b4326589fea95      13837  OMEGATrackC.lean
-SHA-256  37f5f7a68b097ee73bd5d43e957e68361899a49722f5618f67f32669d5c95185      35558  OMEGA_CORE_CERTIFICATE.md
-SHA-256  753b8b422d21a8262b4259cfb0bbe81c76c88cf1d705a81262e74bcf38d9d859      22628  PROVENANCE.txt
+SHA-256  049d691d84611d7fbbe36fa65d877ea01eaec5cc8f84f14fc7276f43afdefe32      36306  OMEGA_CORE_CERTIFICATE.md
+SHA-256  1503d4922896056ebe437b56905cccfe828c7214ee8794be4eefea3b6c5ed423      22991  PROVENANCE.txt
 SHA-256  6b3ba0cdeedcc17d959181d58456390f3f34c95de440ce338f0f03dd895a7fbb      22988  README.md
-SHA-256  90d8137117381496a1fe83148aa45ec6126b709b277d0edea800bf5da6e8f236      15660  REPO_STRUCTURE.md
+SHA-256  d6cf481045d485cc4203bfb6009ae938d6cb2ed83b4d943b8e17356069415144      16471  REPO_STRUCTURE.md
 SHA-256  bc92865222c00223a793c814b47e12372da02530356f574e6e671d638bc1fcb4      11163  Rigorous Ball Arithmetic and Bandwidth-Calibrated Spectral Analysis of the Guinand-Weil Operator Framework.md
-SHA-256  37ad9450a8b0a39ad131258002689e89439a3c265080b219ff7bbd69d0405f27       7877  THIRD_PARTY_SOURCES.md
+SHA-256  f7b5ae6bf679daf8564b76ca3acc198a12e3c2d2b0811ab82ec1f81eea79413a       8247  THIRD_PARTY_SOURCES.md
 SHA-256  8deefcec655a0e12524477e96f2b3699ec88d1c6e4ac97ec6e866a0dca72cd83      25269  WORKING_PAPER.md
 SHA-256  ac0d7a173ed66a20d01e248da50b834ac0b391f1c4ebecdf4b0f99c0ca11c103       5538  ZENODO_METADATA.md
 SHA-256  bf4a68e12f4a9356b762e7e619b22a8a134af45cf1b1086453bc5bdb09910ffc       6459  gw_arb_measured.py
@@ -78,8 +90,9 @@ SHA-256  38311aa13373f9b90ed12cfad7830ce5ed4af019eaaa0d0f8fdee0ac2dea6505       
 SHA-256  ab2aa1d2bffb566589461930c0a14f6ca16dfa90278bd8a752d7c0a4a7a7e3bd       5736  gw_entry_error.py
 SHA-256  895c64272b79eaf56aaa4619166a02bc809733fd1ae5f6cb854703af57c6f7cc      15358  gw_even_arb.py
 SHA-256  90865aa7e23dc3d870e84c316b5f071a330694dffbf0cefb5a300e5d1ebd0ae1      12458  gw_even_arb_100_200.log
-SHA-256  d4b3e01fbca178162bbb4e62e08380141ca1ca2bac50376fddb4f62c500a2502      14097  gw_even_vs_src.py
+SHA-256  389c4736aae57980f3d29e4746eab99f861395b7a604ebed4e27aa831a3eb1a9      15225  gw_even_vs_src.py
 SHA-256  5e58cdfe2bd470208e0ac6e63157220c36305d7be22a45dd6142f1b5c5e963fb       9340  gw_even_vs_src_100_200.log
+SHA-256  edc549b236397322d97f30d502b586d1189879c074d39ae0ca97612f878c36a0       4865  gw_even_vs_src_100_200_rerun_20261002.log
 SHA-256  61280b108a86de23eb3bc0022e05b390aa44aaea3bc652a2ac301d35c710fdc2       8308  gw_final_gate.py
 SHA-256  7add8951ad2e449b6842462706b8b6dfbfc0bb5fd0b14024ad85aead6add03ec       4617  gw_full_vs_even.py
 SHA-256  60969654f8d7fd29bb03ec9da5340764605816ee6a49b3d10bae86ef18b4814e       5680  gw_head_diag.py
@@ -100,7 +113,7 @@ SHA-256  15aa399d0991fdbf85898b6aafaf1afcca58552ba13656fe66e78a79888ef0c6      1
 SHA-256  c9555af1f916ac8570731bbcc63deeb526cb9e270d61b3aa15941716a7a492db      23714  gw_odd_validate.py
 SHA-256  1e7bb9b4a5ac0b1ff1b639ed588cc61bf816fb4707f1c8d31de4d17c4f8ec822      21708  gw_odd_validate_100_200.log
 SHA-256  823de907bb53c42ae297a06a5f4549c48655e6fec87efea8c7a52eadbd98fb85      34145  gw_omega_core_v2.py
-SHA-256  9758b25da3ee615b1d42a736b19d65d05e05d609010df1c2b250df04e82c1bdc      11851  gw_opt_a_diff.py
+SHA-256  477aee08a30d9507e0dd449a9bc84aaa6fea0afe8b1761c10e191cdaeb13ee7f      12870  gw_opt_a_diff.py
 SHA-256  716ca7e707541e78e0ef3ea74b854ea4517d96b56a16c2a08bc2da0cbb661133      13447  gw_opt_b.py
 SHA-256  cec1b1a2b685d217074c28489931f55d3c667b1d5f12435c791adb96a399bbfc      14049  gw_opt_b_arb.py
 SHA-256  eb35b4c03b34dfa87f2ac55ba70017de47b90112a24d5633359dec85788fd6a8       7165  gw_panel_diag.py
@@ -153,4 +166,4 @@ SHA-256  366c16b17fe85841a248da5fdd4ec828e9b81b8d1665c8d27c7b819606e777da       
 SHA-256  9ab3c5e15fec06b6610e9ad36ef2c74a60fea6ad8befaf146b22a9f1fd6337ce       3892  update_registry.py
 SHA-256  2833afef57d2631e4569e77dffca8854584512e396686a1ca03332c4eb6f2780        797  wd_selftest.log
 
-TOTAL FILES : 111
+TOTAL FILES : 112

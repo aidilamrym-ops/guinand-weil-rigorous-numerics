@@ -243,6 +243,17 @@ as evidence of runs that actually happened on 2026-10-02; what the module does
 *not* cover is stated in README §4.1 (the literals come from the FLINT/Arb
 stage and are not re-derived inside Lean).
 
+### Files added 2026-10-02 (source-hash gate rerun)
+
+| file | role |
+|---|---|
+| `gw_even_vs_src_100_200_rerun_20261002.log` | full rerun (exit 0, 339 s) of `gw_even_vs_src.py 100 200 400 2000` after that script was taught to pin **both** copies of the vendored source; reproduces $\delta$, $\delta_{\rm rel}$, the median ratio and the `V1` verdict **identically** to `gw_even_vs_src_100_200.log` |
+
+The original `gw_even_vs_src_100_200.log` is kept unedited -- it records the
+2026-09-27 state, when the working copy was still byte-identical to upstream.
+Which copy exists where, and why both logs are honest:
+`THIRD_PARTY_SOURCES.md` §1, `PROVENANCE.txt` §6.10, certificate §1/§6.1.
+
 ### Current inventory (measured 2026-10-02)
 
 Counted from `git ls-files` on the published tree; supersedes the proposal
@@ -250,23 +261,24 @@ table above, which is left untouched as the 2026-09-29 record.
 
 | category | count |
 |---|---:|
-| tracked files (manifest covers 111 + `CHECKSUM.sha256` itself) | **112** |
+| tracked files (manifest covers 112 + `CHECKSUM.sha256` itself) | **113** |
 | `*.py` -- all pass `py_compile`, 0 failures | **52** |
 | `gw_*.py` | 47 |
 | `probe_*.py` | 2 |
 | other `*.py` (`source_arb_ldlt_certify.py`, `update_registry.py`, `track_c_make_smt.py`) | 3 |
 | `*.md` | 10 |
-| `*.log` (forensic run logs, shipped on purpose) | 21 |
+| `*.log` (forensic run logs, shipped on purpose) | 22 |
 | `*.json` | 12 |
 | `*.ps1` | 2 |
 | `*.lean` (Track C) | 1 |
 | `*.smt2` (Track C, generated) | 1 |
-| working-tree size | 64.63 MB (67764294 bytes) |
+| working-tree size | 64.64 MB (67776166 bytes) |
 
 Verification re-run on this date: `python gw_check_refs.py`,
 `python gw_verify_results.py`, `python gw_verify_production.py` -- **all exit
 0**; `python track_c_make_smt.py` -- **exit 0** (`unsat` 7/7 + combined,
 literal cross-check `MATCH` 3/3); `lean OMEGATrackC.lean` -- **exit 0** with
 axiom footprint `[propext, Classical.choice, Quot.sound]` on all 10 theorems;
-`CHECKSUM.sha256` re-verified against every listed file -- **0 hash or size
-mismatches**.
+`python gw_even_vs_src.py 100 200 400 2000` -- **exit 0**, verdict `V1`, log
+`gw_even_vs_src_100_200_rerun_20261002.log`; `CHECKSUM.sha256` re-verified
+against every listed file -- **0 hash or size mismatches**.

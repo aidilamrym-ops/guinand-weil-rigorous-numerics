@@ -55,16 +55,20 @@ repository as `source_arb_ldlt_certify.py.bak_20260930_062119` (12256 bytes,
   (`gw_omega_core_v2.py` line 707), so the caveat block inside
   `omega_core_v2_run.log` and `omega_v2_stdout.txt` reports `b7fee730...` even
   for the $N=800$ block, which ran on `33617ce6...`. The logs are never edited.
-* `gw_even_vs_src.py` (lines 54, 144-150) recomputes the on-disk SHA-256 and
-  compares it to `b7fee730...`. Its shipped log
+* `gw_even_vs_src.py` (lines 54-64, 154-172) recomputes the on-disk SHA-256 and
+  compares it against **both** pinned copies: `b7fee730...` (verbatim upstream)
+  or `33617ce6...` (the documented 2026-09-30 extension). It reports which one
+  it found, and it fails on any third value with
+  `*** MISMATCH -- do NOT trust this run ***`. Its original log
   `gw_even_vs_src_100_200.log` recorded `MATCH -- byte-identical` on
-  2026-09-27, which was true then; **re-running it today prints
-  `*** MISMATCH -- do NOT trust this run ***`**, because the file changed. The
-  check is working correctly. Re-run it only together with
-  `git show b76be0d:source_arb_ldlt_certify.py` restored, or expect the
-  mismatch.
-* `gw_opt_a_diff.py` line 105 only *prints* the expected hash as a header
-  comment; it does not verify it.
+  2026-09-27, which was true then; the full rerun of 2026-10-02
+  (`gw_even_vs_src_100_200_rerun_20261002.log`, exit 0, 339 s) records
+  `MATCH -- documented local extension` and reproduces $\delta_{L_\infty}$,
+  $\delta_{\rm rel}$, the median ratio and the `V1` verdict **identically** to
+  the 2026-09-29 log -- only wall-clock times differ. Both logs are shipped;
+  neither was edited.
+* `gw_opt_a_diff.py` prints the SHA-256 it actually loaded and which pinned
+  copy that is, instead of asserting a single hash in a header comment.
 
 ### MIT licence text (as distributed with the source package)
 

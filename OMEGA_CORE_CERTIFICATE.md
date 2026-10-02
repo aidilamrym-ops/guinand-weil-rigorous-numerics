@@ -511,6 +511,17 @@ Provenance of these rows:
   Rationale and disclosure: PROVENANCE.txt section 6.9.
 * `gw_verify_production.py` (added 2026-10-01) parses numbers with `mpmath`
   because float64 underflows a $10^{-2877}$ bound to `0.0`.
+* `gw_even_vs_src.py` and `gw_opt_a_diff.py` (edited 2026-10-02): their
+  source-hash lines were reconciled with the 2026-09-30 edit of
+  `source_arb_ldlt_certify.py` described in section 1. `gw_even_vs_src.py` now
+  pins **both** copies and fails on any third value; `gw_opt_a_diff.py` prints
+  the hash it actually loaded instead of asserting one in a header comment.
+  The baseline log `gw_even_vs_src_100_200.log` (2026-09-27, `MATCH --
+  byte-identical`) is kept unedited, and the rerun
+  `gw_even_vs_src_100_200_rerun_20261002.log` (exit 0, 339 s) reproduces the
+  same $\delta$, $\delta_{\rm rel}$, median ratio and `V1` verdict -- only
+  wall-clock times differ. Disclosure: THIRD_PARTY_SOURCES.md section 1,
+  PROVENANCE.txt section 6.10.
 
 `gw_check_refs.py` (static reference check) and `gw_verify_results.py` (JSON
 invariant check) are mandatory pre-run gates for any large sweep.

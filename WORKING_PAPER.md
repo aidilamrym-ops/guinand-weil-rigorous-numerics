@@ -133,10 +133,21 @@ as absolute safety, and the deviation is not folded into R1.
 
 ## 1.5 Tooling
 
-Python 3.14, `mpmath` ($dps$ 30–384), `python-flint 0.9.0`. **No proof
-assistant has been run:** `lean`, `coqc`, `isabelle`, `dkcheck`, `z3` and `gcc`
-are `NOT RUN` for every claim in this paper. Ball arithmetic is an automatic
-numerics tool; it is not a proof assistant, and we do not present it as one.
+Python 3.14, `mpmath` ($dps$ 30–384), `python-flint 0.9.0`. Every eigenvalue,
+enclosure and bound reported in this paper is produced by ball arithmetic;
+**the numerics are not kernel-checked by a proof assistant**, and we do not
+present them as if they were. Ball arithmetic is an automatic numerics tool.
+
+Added after this text was first written (2026-10-02, repository root, README
+§4.1): a Lean 4 module `OMEGATrackC.lean` covering the certified-tolerance
+perturbation inference that underpins Route A1 (Chapter 3) -- the Rayleigh /
+Weyl step, the constants $81 < C < 82$, and the measured margin -- over the
+literals this paper prints, cross-checked against `z3` for its seven
+exact-rational side conditions. `lean` and `z3` **have been run**
+on that module (logs: `track_c_lean_verify.log`, `track_c_smt_z3.log`). The
+module takes $\mu$, $\rho_{\text{actual}}$ and $\rho^*$ as *literals* -- it
+checks that they are the numbers this paper states, not that they are correct
+numbers. `coqc`, `isabelle`, `dkcheck` and `gcc` were **not run**.
 
 ---
 
@@ -499,9 +510,12 @@ This result concerns **a matrix constraint only**. It does **not** establish:
 * any prime-counting statement;
 * any factorisation method.
 
-The source preprint disclaims all four, and we disclaim them with it. No proof
-assistant has been run: `lean`, `coqc`, `isabelle`, `dkcheck` and `z3` are
-`NOT RUN` throughout, and Track C integration is **not started**.
+The source preprint disclaims all four, and we disclaim them with it. For the
+numerics of this paper **no proof assistant has been run**: `coqc`, `isabelle`,
+`dkcheck` and `gcc` are `NOT RUN`. Since 2026-10-02 the repository additionally
+ships `OMEGATrackC.lean`, type-checked by `lean` 4.33.1 with `z3` 4.16.0 on its
+seven side conditions -- that module checks the inference and the arithmetic
+*over* the numbers printed here, not the origin of the numbers (§1.5).
 
 ### Limitations
 
@@ -517,12 +531,24 @@ assistant has been run: `lean`, `coqc`, `isabelle`, `dkcheck` and `z3` are
   measured at $4\le N\le 64$ ($c=13$) and at $(100,20)$, $(100,40)$; no
   measurement or argument in this paper decides the limit.
 
-### Open items
+### Open items (updated 2026-10-02)
 
-Owing (a) entry-wise diff against the released source package, (b) the
-$(100,200)$ 401×401 matrix with even/odd split, and (d) the conditional status
-of Montgomery pair correlation, remain **not started** pending explicit
-instruction.
+This section previously listed three items as **not started**. All three were
+carried out on 27 Sep 2026 and are recorded in `GW_STATUS_2026-09-26.md`:
+
+* (a) entry-wise diff against the released source package -- §7g, 398 decimal
+  digits of agreement with `arb_ldlt_certify.py` (gate G3 `LULUS`);
+* (b) the $(100,200)$ 401×401 matrix with even/odd split -- §7d, the two
+  sectors agree with the full spectrum, $\max|\Delta| =
+  5.4615478\times10^{-399}$;
+* (d) the conditional status of Montgomery pair correlation -- §7h, run 2
+  (2000 samples, seed `20260927`) returns S2
+  `INCONSISTENT WITH MONTGOMERY AT THIS RESOLUTION`, reported as a
+  resolution-limited operational measurement and explicitly **not** as
+  Montgomery's theorem.
+
+No item from that list is open any more; the list is retained in this updated
+form rather than deleted, so the correction is visible on the page.
 
 ---
 

@@ -42,8 +42,13 @@ abstract: >-
   identically for |n| <= 10 where the eigenvector is localised. Eight
   self-retracted claims are preserved. Scope: a matrix constraint only - not a
   proof of the Riemann Hypothesis, Weil positivity, prime counting, or
-  factorisation; the source preprint disclaims all four. No proof assistant
-  (Lean, Coq, Isabelle, Z3) was run.
+  factorisation; the source preprint disclaims all four. The numerics are not
+  kernel-checked by a proof assistant: Coq and Isabelle were not run, and ball
+  arithmetic is an automatic numerics tool. Added 2026-10-02 as a separate
+  layer, Track C: a Lean 4 module (OMEGATrackC.lean) type-checked over the
+  literals printed above, and seven exact-rational side conditions discharged
+  by the Z3 SMT solver - see README section 4.1 for what that layer does and
+  does not cover.
 
 references:
   - type: article

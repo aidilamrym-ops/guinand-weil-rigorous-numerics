@@ -12,15 +12,17 @@ with the licence under which they are redistributed.
 | origin | `https://github.com/akivag613/connes-cvs-` |
 | path | `papers/2_guinand_weil_dictionary_tail_order/scripts/arb_ldlt_certify.py` |
 | retrieved | 2026-09-27 |
-| size | 12256 bytes |
-| SHA-256 | `b7fee730a83baedc860ca456547d2799ec10894a79edecc6d5612931b41509e3` |
+| size as shipped | 12863 bytes |
+| SHA-256 as shipped | `33617ce64b0e052c07873b196a3744f2f5142a4aaf7b4cfbe9e3de43d17c27bb` |
+| size as retrieved (verbatim) | 12256 bytes |
+| SHA-256 as retrieved | `b7fee730a83baedc860ca456547d2799ec10894a79edecc6d5612931b41509e3` |
 | licence | MIT — `Copyright (c) 2026 Akiva Groskin` |
-| used by | `gw_opt_a_diff.py` (Option (a) entrywise matrix diff) |
+| used by | `gw_omega_core_v2.py` (imports `build_arb_tau`, the certified matrix entries), `gw_opt_a_diff.py` (Option (a) entrywise matrix diff), `gw_even_vs_src.py` |
 
-### Why this file is stored verbatim
+### Why the file is stored verbatim -- and how it was then modified
 
-The SHA-256 above is **byte-identical** to the `script_sha256` field recorded in
-the upstream provenance file
+The SHA-256 as retrieved is **byte-identical** to the `script_sha256` field
+recorded in the upstream provenance file
 `artifacts/c100_N200_arb_ldlt_prec9000_provenance.json`, which also records
 `n_pos = 401`, `n_neg = 0`, `dimension = 401`, `prec_bits = 9000`,
 `c = 100`, `N = 200`, `package_commit = 8ce0fc791ed9c9ca6f4ba512322720b4be80421b`.
@@ -29,6 +31,40 @@ Storing the file byte-for-byte is therefore part of the *evidence*: it makes
 reproduction of the diff in `gw_opt_a_diff.py` a check against the exact code
 that produced the published certificate, rather than against an approximation
 of it. Re-typing the formulas by hand would have destroyed that link.
+
+**That verbatim copy is preserved at git commit `b76be0d` (2026-09-27):**
+`git show b76be0d:source_arb_ldlt_certify.py | sha256sum` must print
+`b7fee730...1509e3`, and the file at that commit is 12256 bytes.
+
+**The working-tree file is no longer that copy.** On 2026-09-30 09:12:19
+(commit `bfa40dc`, "Add power-cut checkpointing to the OMEGA-CORE sweep") the
+file was extended with exactly three keyword arguments on `build_arb_tau` --
+`start_row`, `row_hook`, `prefill` -- so a multi-hour sweep could resume after
+the machine lost power. All three default to the original behaviour and no
+arithmetic was changed; the diff is 607 bytes of new parameters and hooks only.
+The copy that ran the certified $N=800$ sweep is this 12863-byte file,
+SHA-256 `33617ce6...c27bb`. The pre-edit bytes are also on disk outside the
+repository as `source_arb_ldlt_certify.py.bak_20260930_062119` (12256 bytes,
+`b7fee730...`).
+
+**Consequences an evaluator should know about, recorded rather than hidden:**
+
+* `OMEGA_CORE_CERTIFICATE.md` section 1 reconciles both hashes and says which
+  run used which copy; section 6.1 lists the shipped one.
+* The engine prints the *original* hash from a hard-coded string
+  (`gw_omega_core_v2.py` line 707), so the caveat block inside
+  `omega_core_v2_run.log` and `omega_v2_stdout.txt` reports `b7fee730...` even
+  for the $N=800$ block, which ran on `33617ce6...`. The logs are never edited.
+* `gw_even_vs_src.py` (lines 54, 144-150) recomputes the on-disk SHA-256 and
+  compares it to `b7fee730...`. Its shipped log
+  `gw_even_vs_src_100_200.log` recorded `MATCH -- byte-identical` on
+  2026-09-27, which was true then; **re-running it today prints
+  `*** MISMATCH -- do NOT trust this run ***`**, because the file changed. The
+  check is working correctly. Re-run it only together with
+  `git show b76be0d:source_arb_ldlt_certify.py` restored, or expect the
+  mismatch.
+* `gw_opt_a_diff.py` line 105 only *prints* the expected hash as a header
+  comment; it does not verify it.
 
 ### MIT licence text (as distributed with the source package)
 
@@ -60,10 +96,26 @@ SOFTWARE.
 
 ## Scope statement
 
-`source_arb_ldlt_certify.py` is vendored for **comparison only**. No claim in
-this repository is derived from running its `certified_inertia()` path; the
-inertias reported here were produced by `flint.arb_mat.eig` in
-`gw_corrected_eig.py` and `gw_opt_b_arb.py`.
+`source_arb_ldlt_certify.py` is used for two different purposes here; they must
+not be conflated:
+
+1. **Comparison** (the original purpose). `gw_opt_a_diff.py` and
+   `gw_even_vs_src.py` rebuild a reference matrix with it and diff ours against
+   it, byte-checking that the vendored file still matches the published
+   `script_sha256`.
+2. **Construction.** `gw_omega_core_v2.py` executes
+   `import source_arb_ldlt_certify as src` and calls `src.build_arb_tau(...)` to
+   produce the Arb entries of every OMEGA-CORE target, including both certified
+   ones ($N=400$ and $N=800$). The matrix entries quoted in
+   `OMEGA_CORE_CERTIFICATE.md` are therefore built by this third-party code;
+   that code is MIT-licensed, unmodified in its arithmetic, and pinned by
+   SHA-256 in section 1 above.
+
+What is *not* taken from it is its `certified_inertia()` path. No inertia
+reported anywhere in this repository comes from that function: OMEGA-CORE
+inertias come from the engine's own interval $LDL^T$ (`certified_ldlt`,
+Sylvester's criterion), and the inertias in `gw_corrected_eig.py` and
+`gw_opt_b_arb.py` come from `flint.arb_mat.eig`.
 
 Nothing in this repository establishes the Riemann Hypothesis, Weil
 positivity, a prime-counting result, or a factorisation method. The upstream
@@ -86,7 +138,11 @@ copied into this repository, and none of their code was edited.
 
 **Tool status:** `python 3.14` + `numpy` + `scipy` were **RUN**.
 `lean` / `coqc` / `isabelle` / `dkcheck` / `z3` / `gcc` were **NOT RUN** in the
-session that produced the freeze.
+session that produced the freeze. Subsequently, on 2026-10-02, `lean` 4.33.1
+and `z3` 4.16.0 **were RUN** for Track C only (`OMEGATrackC.lean`,
+`track_c_make_smt.py`); `coqc`, `isabelle`, `dkcheck` and `gcc` remain **NOT
+RUN**. See `OMEGA_CORE_CERTIFICATE.md` section 6.7 for what that run does and
+does not establish.
 
 ### Provenance of first-party artifacts
 

@@ -79,8 +79,11 @@ Tool status: python 3.14 + numpy + scipy were RUN.
 lean / coqc / isabelle / dkcheck / z3 / gcc were NOT RUN in this session.
 
 Third-party vendored source and its licence: see THIRD_PARTY_SOURCES.md
-(the only vendored file, source_arb_ldlt_certify.py, SHA-256
-b7fee730a83baedc860ca456547d2799ec10894a79edecc6d5612931b41509e3, MIT).
+(the only vendored file, source_arb_ldlt_certify.py, MIT.  Two SHA-256 values
+apply to it: b7fee730a83baedc860ca456547d2799ec10894a79edecc6d5612931b41509e3
+as retrieved on 2026-09-27 (12256 bytes, preserved at git commit b76be0d), and
+33617ce64b0e052c07873b196a3744f2f5142a4aaf7b4cfbe9e3de43d17c27bb as shipped
+(12863 bytes, extended 2026-09-30 for checkpoint resume).  See residual 6.10.)
 
 ================================================================================
 5. SCOPE LIMIT (read literally)
@@ -251,6 +254,17 @@ Where it still occurs:
     source directory, checkpoint directory D:\gw_ckpt), update_registry.py
     (docstring), plus smoke.log, smoke_escalate.log and
     omega_v2_stderr_FAILED_absbug_*.txt (forensic captures).
+  * NOT in the Track C files added 2026-10-02: OMEGATrackC.lean,
+    track_c_side_conditions.smt2, track_c_lean_verify.log and
+    track_c_make_smt.py contain no C:\Users\... path.  track_c_make_smt.py
+    relativises every path under the repository root before writing it into
+    track_c_smt_z3.log, so that log reads "readme = README.md" rather than a
+    local absolute path.  What the Track C artefacts do carry is one
+    machine-local tool path with no account name in it,
+    E:\4_TOOLS_INSTALLER\z3-4.16.0-x64-win\bin\z3.exe, printed by
+    track_c_make_smt.py as the solver it invoked.  track_c_lean_verify.log
+    records its build command with <stage> in place of the temporary
+    directory it used.
 
 Repaired 2026-10-01 (disclosed, behavior-preserving):
   * gw_check_refs.py, gw_verify_results.py and gw_verify_production.py no
@@ -282,6 +296,34 @@ silently rewriting these files would destroy the provenance this file exists
 to assert.
 
 ================================================================================
+6.10 DECLARED RESIDUAL -- THE VENDORED SOURCE PACKAGE WAS EDITED AFTER FREEZE
+================================================================================
+THIRD_PARTY_SOURCES.md section 1 and section 4 above both record the vendored
+file source_arb_ldlt_certify.py as 12256 bytes / b7fee730...1509e3, which is
+correct for the file AS RETRIEVED on 2026-09-27 and still correct for the copy
+held at git commit b76be0d.  The working-tree copy is 12863 bytes /
+33617ce64b0e052c07873b196a3744f2f5142a4aaf7b4cfbe9e3de43d17c27bb, because
+commit bfa40dc of 2026-09-30 09:12:19 ("Add power-cut checkpointing to the
+OMEGA-CORE sweep") added three default-preserving keyword arguments to
+build_arb_tau (start_row, row_hook, prefill) so the sweep could resume after
+the power cut of 2026-09-30 03:15:19.  The arithmetic is unchanged; the copy
+that ran the certified N=800 sweep is the edited one.
+
+What this affects, all of it recorded rather than repaired:
+  * OMEGA_CORE_CERTIFICATE.md section 1 now reconciles both hashes.
+  * gw_omega_core_v2.py line 707 prints the ORIGINAL hash from a hard-coded
+    string, so the caveat inside omega_core_v2_run.log and omega_v2_stdout.txt
+    reports b7fee730... for the N=800 block too.  Logs are never edited.
+  * gw_even_vs_src.py lines 54/144-150 compare the on-disk hash against
+    b7fee730...; its shipped log gw_even_vs_src_100_200.log recorded MATCH on
+    2026-09-27 (true then).  A re-run today reports MISMATCH -- the check is
+    behaving correctly, and the mismatch is the disclosure.
+  * gw_opt_a_diff.py line 105 only prints the expected hash; it does not verify.
+
+Residual accepted as disclosed.  Repairing any of these silently would falsify
+either a log or a git history that already exists.
+
+================================================================================
 7. TOOL STATUS FOR THE OMEGA-CORE SESSION
 ================================================================================
 python       3.14.4   (C:\Python314\python.exe)
@@ -291,9 +333,18 @@ numpy        NOT USED by gw_omega_core_v2.py (zero-fudging rule: no numpy,
 mpmath       NOT USED on this route -- entries are built natively in Arb,
              there is NO decimal hand-off.
 
-Tool status: python 3.14 + python-flint 0.9.0 were RUN.
-lean / coqc / isabelle / dkcheck / z3 / gcc were NOT RUN in this session
--> the certificate is NOT proof-assistant verified.
+Tool status for the certification session: python 3.14 + python-flint 0.9.0
+were RUN.  lean / coqc / isabelle / dkcheck / z3 / gcc were NOT RUN in that
+session -> the certificate is NOT proof-assistant verified.
+
+Tool status for 2026-10-02 (Track C only, OMEGA_CORE_CERTIFICATE.md 6.7):
+lean 4.33.1 and z3 4.16.0 WERE RUN on OMEGATrackC.lean / the generated
+track_c_side_conditions.smt2 (10/10 theorems, axiom footprint
+[propext, Classical.choice, Quot.sound], 0 sorryAx; 7/7 negations UNSAT plus
+their conjunction).  coqc / isabelle / dkcheck / gcc remain NOT RUN.  Track C
+consumes the certified numbers as literals; no Arb matrix and no LDL^T is
+re-checked by any proof assistant, so the matrix claims above remain
+machine-checked ball arithmetic, not kernel-checked theorems.
 
 Method and formulae: see OMEGA_CORE_CERTIFICATE.md (matrix definition,
 zero-fudging architecture, the bound derivation, telemetry schema).

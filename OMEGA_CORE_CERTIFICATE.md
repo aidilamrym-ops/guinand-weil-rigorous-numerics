@@ -1,25 +1,43 @@
-# OMEGA-CORE Falsification Engine v2 -- Certified Positive Definiteness of the Guinand-Weil Matrix at $N=400$
+# OMEGA-CORE Falsification Engine v2 -- Certified Positive Definiteness of the Guinand-Weil Matrices at $N=400$ and $N=800$
 
-**Snapshot:** 2026-09-29 15:19:49
-**Target:** $(c, N) = (100, 400)$, $\dim = 2N+1 = 801$
-**Verdict:** `VERIFIED POSITIVE DEFINITE`
-**Tool status:** python 3.14.4 + python-flint 0.9.0. `lean` / `coqc` / `isabelle` / `dkcheck` / `z3` / `gcc` **NOT RUN**.
+**Snapshot:** 2026-09-29 15:19:49 (the $N=400$ certificate; the $N=800$ target completed 2026-10-01 21:06)
+**Target (this snapshot):** $(c, N) = (100, 400)$, $\dim = 2N+1 = 801$
+**Target (recorded in section 6.6):** $(c, N) = (100, 800)$, $\dim = 2N+1 = 1601$
+**Verdict:** `VERIFIED POSITIVE DEFINITE` for both targets -- $n_{+}=801,\ n_{-}=0$ ($N=400$) and $n_{+}=1601,\ n_{-}=0$ ($N=800$)
+**Tool status:** python 3.14.4 + python-flint 0.9.0 produced every number below. `coqc` / `isabelle` / `dkcheck` / `gcc` **NOT RUN**. `lean` 4.33.1 and `z3` 4.16.0 were run on 2026-10-02, but only for the separate Track C module (`OMEGATrackC.lean`, section 6.7), which takes the literals printed here as *inputs*. **No number below is kernel-checked**, and ball arithmetic is not a proof assistant.
 
 > **SCOPE LIMIT, read literally.**
 > Nothing in this document establishes the Riemann Hypothesis, Weil positivity,
 > a prime-counting result, or a factorisation method. What is certified is the
-> inertia of one finite, deterministic, real symmetric matrix of order 801,
-> together with a rigorous lower bound on its smallest eigenvalue. The matrix
-> is a *finite truncation*, not the operator it approximates.
+> inertia of two finite, deterministic, real symmetric matrices -- of order 801
+> ($N=400$) and of order 1601 ($N=800$) -- together with a rigorous lower bound
+> on each smallest eigenvalue. Each matrix is a *finite truncation*, not the
+> operator it approximates.
 
 ---
 
 ## 1. The matrix, as built
 
-`build_arb_tau(c, N, prec)` (in the vendored, byte-pinned source package
-`source_arb_ldlt_certify.py`, SHA-256
-`b7fee730a83baedc860ca456547d2799ec10894a79edecc6d5612931b41509e3`, MIT) assembles a
-$(2N+1)\times(2N+1)$ Arb ball matrix. Indexing is
+`build_arb_tau(c, N, prec)` (in the vendored source package
+`source_arb_ldlt_certify.py`, MIT) assembles a $(2N+1)\times(2N+1)$ Arb ball matrix. Indexing is
+
+**Two SHA-256 values exist for that file; both are correct for different
+copies, and they are not interchangeable.**
+
+| copy | bytes | SHA-256 | where it is recorded |
+|---|---:|---|---|
+| original third-party package, stored verbatim | 12256 | `b7fee730a83baedc860ca456547d2799ec10894a79edecc6d5612931b41509e3` | git `b76be0d` (2026-09-27); upstream `script_sha256`; `THIRD_PARTY_SOURCES.md` section 1; `PROVENANCE.txt` line 83 |
+| resume-enabled copy that actually ran the $N=800$ sweep | 12863 | `33617ce64b0e052c07873b196a3744f2f5142a4aaf7b4cfbe9e3de43d17c27bb` | working tree and git `bfa40dc` (2026-09-30 09:12:19); section 6.1 of this certificate |
+
+The 2026-09-30 edit added exactly three keyword arguments to `build_arb_tau`
+(`start_row`, `row_hook`, `prefill`) so the sweep could resume after the power
+cut; all three default to the original behaviour, so no arithmetic changed.
+The $N=400$ runs of 2026-09-29 used the original bytes; the $N=800$ sweep used
+the extended copy. Caveat: `gw_omega_core_v2.py` line 707 prints the *original*
+hash from a hard-coded string, so the caveat block inside
+`omega_core_v2_run.log` and `omega_v2_stdout.txt` reports `b7fee730...` for the
+$N=800$ block as well. The file that ran is the `33617ce6...` copy. The logs are
+never edited (see `PROVENANCE.txt`); this correction is recorded here.
 
 $$i, j \in \{0,\dots,2N\}, \qquad n = i - N, \qquad m = j - N,$$
 
@@ -213,7 +231,10 @@ rather than overclaims), and $\|L^{-1}\|_F$ uses `abs_upper()` on every entry of
 
 ## 3. The $N=400$ certificate
 
-Verbatim from `omega_core_v2_results.json`:
+Verbatim from `omega_core_v2_results.json` as it stood when this section was
+written. **The shipped file now holds the $N=800$ record only** (section 6.6);
+the $N=800$ run overwrote it on 2026-10-01, so the block below survives solely
+in this certificate and in `omega_core_v2_run.log`:
 
 ```json
 {
@@ -287,7 +308,7 @@ Verbatim from `omega_core_v2_results.json`:
 | $n_+$ | 723 | **801** |
 | $n_-$ | 0 | 0 |
 | undetermined pivot | **index 723** | none |
-| max entry radius | $2.154758\times10^{-2577}$ | $1.398551\times10^{-5266}$ |
+| max entry radius | $2.154759\times10^{-2577}$ | $1.398551\times10^{-5266}$ |
 | max pivot radius | $6.505415\times10^{-38}$ | $1.135790\times10^{-2384}$ |
 
 Attempt 1 **stopped at pivot 723** because that pivot ball straddled zero. It was
@@ -361,10 +382,37 @@ is deep inside one long call, not wedged. The watchdog reports `ACTIVE` or
 
 ### 4.3 Observed reliability record
 
-At snapshot time: 0 `ALERT` lines across the whole run; `ACLineStatus = 1`
-(plugged in); free physical RAM 9.5 GB; free commit 14.4 GB; CPU delta
-+52 to +59 s per 60 s sample (one core saturated, no thrashing); page faults
-not elevated.
+**While the sweep ran** (2026-09-29 10:11:49 -> 2026-10-01 21:06): **0 `ALERT`
+lines**. `ac=1` (mains present) in all 3329 samples that carry the field, so
+`AC-LOST = 0`. At the snapshot moment of 2026-09-29 15:19:49: free physical RAM
+9.5 GB, free commit 14.4 GB, CPU delta +52 to +59 s per 60 s sample (one core
+saturated, no thrashing), page faults not elevated. Neither
+`omega_core_v2_run.log` nor `omega_v2_stdout.txt` contains a single `] ALERT `.
+
+**After it finished**, the log-and-continue monitor kept running and raised
+**60 x `ALERT SWEEP-DEAD`**, one per minute, from 2026-10-01 21:07:20 to
+22:06:27, every one of them `pid=2356` and every one carrying
+`stage=sweep:complete`. That is the expected shape of a monitor that outlives
+the process it watches: the engine had already exited cleanly with
+`VERIFIED POSITIVE DEFINITE`, and neither monitor may kill or restart anything.
+So the honest statement is **0 ALERT during the run, 60 terminal-cycle
+`SWEEP-DEAD` after it**, not "0 across the whole log file".
+
+The final telemetry of record:
+
+* `omega_v2_sysmon.log` -- 3332 lines. Three `sysmon start` lines:
+  `interval=5s` at 2026-09-29 10:11:49 (three samples 5 s apart), then
+  `interval=60s` at 10:13:23, then `interval=60s` again at 2026-09-30 08:37:22
+  (the resume after the power cut). Exactly one gap > 120 s exists in the file,
+  2026-09-30 03:15:19 -> 08:37:22 = 19 323 s, and it is that power cut. Last
+  line 2026-10-01 22:06:27.
+* `omega_core_v2_watchdog.log` -- 3929 lines, seven `WATCHDOG start` lines, all
+  `interval=60s`, the last two monitoring `pid=2356`. **0 `DEAD`, 0 `ALERT`**
+  for its entire life; its final line is
+  `last heartbeat: {"stage": "sweep:complete", ...}` at 2026-10-01 21:07:15.
+* `omega_v2_pid.txt` = `2356` (the certified run); `omega_v2_stderr.txt` = 0 B
+  (no stderr was ever written); `wd_selftest.log` = the 2026-09-28 self-test of
+  the watchdog's own polling loop.
 
 Two self-inflicted false alarms are recorded here because they were *our* bugs,
 not the system's:
@@ -488,10 +536,18 @@ repository's git history.
 |---|---:|---|
 | `omega_v2_sysmon.log` | 526181 | `95a4df23e50430e4e315b5cda08531b687dbdcf4e7d934c5e7d3db42910ef50a` |
 | `omega_core_v2_watchdog.log` | 593637 | `11526d8c1f5ff561954f869b482e9f4895ec455529ce68bde99c169090b4d440` |
+| `omega_v2_pid.txt` | 6 | `28f7be901cd616d7eae24710c5d2bf41a966eb0b657de3457a7996d4b2a267b7` |
+| `omega_v2_stderr.txt` | 0 | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| `wd_selftest.log` | 797 | `2833afef57d2631e4569e77dffca8854584512e396686a1ca03332c4eb6f2780` |
 
 Final bytes: both monitors were stopped after the sweep exited (2026-10-01,
 22:12 local). They supersede the 2026-09-29 snapshot values (48,685 and
 145,997 bytes), which were taken mid-run.
+
+`omega_v2_pid.txt` holds the certified run's PID (`2356`); the empty
+`omega_v2_stderr.txt` (0 bytes, SHA-256 of the empty string) is itself the
+evidence that no error was ever written; `wd_selftest.log` is the watchdog's
+own polling self-test of 2026-09-28, not a sweep log.
 
 ### 6.4 Failed run, kept as audit trail
 
@@ -549,6 +605,69 @@ Measured values, read from `omega_core_v2_results.json` (not recomputed):
   on float64 underflow of the $10^{-2877}$ bound -- a defect in the check,
   not in the result -- and was fixed to parse with `mpmath`.
 
+**Full run history, as preserved inside `omega_core_v2_run.log` (the log is
+appended to, never edited, so all three phases of this target sit in one
+file):**
+
+1. *First $N=800$ attempt, 9000 bits* (lines 61-72): build 33,497.2 s,
+   $n_{+}=1087$, **`undetermined_pivot=1087`** -> `UNDETERMINED pivot at index
+   1087 -> escalating precision`. That is a **non-result**, recorded as one;
+   it is the reason the successful run below is at 18000 bits.
+2. *Second attempt, 18000 bits* (lines 74-79): header written
+   (`start_prec=18000  escalations=0  checkpoint: D:\gw_ckpt`) and then **nothing
+   -- the machine lost power on 2026-09-30 03:15:19**. No number from this
+   attempt is claimed anywhere.
+3. *Relaunch* (lines 93-116): `attempt 1` of a fresh process at 18000 bits,
+   resumed from the checkpoint (build `rows recorded, 2.92 GB on disk`;
+   LDLT `2.41 GB on disk`), which produced the verdict quoted above.
+
+**Checkpoint corroboration.** The checkpoint directory `D:\gw_ckpt` (deliberately
+not shipped -- 5.3 GB) still holds `build.ckpt` (2,916,757,855 bytes,
+2026-10-01 07:35:38), `build.ckpt.time` = `85213.334`, `ldlt.ckpt`
+(2,407,358,576 bytes, 2026-10-01 18:11:21) and `ldlt.ckpt.time` = `38023.975`.
+Those two times are **identical, to the digit, with the phase wall times this
+certificate reports** (85,213.3 s build, 38,024.0 s certified $LDL^T$), and the
+byte sizes match the 2.92 GB / 2.41 GB printed in the log -- independent
+evidence that the reported timings were not typed in.
+
+---
+
+### 6.7 Track C -- the derived layer, machine-checked (2026-10-02)
+
+Everything above describes numbers produced by ball arithmetic. Track C is the
+*separate*, post-hoc check of what can be said once those numbers are taken as
+**inputs**: the rational/algebraic side conditions behind the
+$\lambda_{\min}$ and tolerance bounds, formalised in Lean 4 and discharged again
+by an SMT solver.
+
+| file | bytes | SHA-256 |
+|---|---:|---|
+| `OMEGATrackC.lean` | 13837 | `8894d24bee7107dee42ea2bcf3a6034323d1188872d41e43126b4326589fea95` |
+| `track_c_make_smt.py` | 12714 | `42ac3122ac81c5505d65bf7239fa21554227136fde4c3476ae18bebd6f000933` |
+| `track_c_side_conditions.smt2` | 1533 | `77456c1652559ce84d246ad250244cf5bb35cf5d8c66dc6915daf6bafd43ee40` |
+| `track_c_lean_verify.log` | 1810 | `46d4b109dd5ccc5d75a42607bcb8ca61b1da1d0ddb366dfbdc527659888f3b79` |
+| `track_c_smt_z3.log` | 1383 | `366c16b17fe85841a248da5fdd4ec828e9b81b8d1665c8d27c7b819606e777da` |
+
+Results, read from those two logs (both `RESULT: PASS`):
+
+* **Lean 4.33.1** (`track_c_lean_verify.log`): the *shipped* `OMEGATrackC.lean`
+  was staged byte-identically (`source == stage: IDENTICAL`, sha
+  `8894D24B...FEA95`) and built with `exit=0` in 12.6 s. `#print axioms` on all
+  **10/10** theorems returns exactly `[propext, Classical.choice, Quot.sound]`;
+  **0 `sorryAx`** / error lines.
+* **z3 4.16.0** (`track_c_smt_z3.log`): the three constants used by the
+  module (`lambdaMin`, `rhoActual`, `rhoStar`) are cross-checked against their
+  values in `README.md` and are `MATCH` on all 3; each of the **7** side
+  conditions negated is `UNSAT`, and so is their combined conjunction.
+* `track_c_make_smt.py` itself is the generator of both artifacts and is
+  included so the `.smt2` file can be re-derived rather than trusted.
+
+**Boundary of Track C.** It checks the *chain of inequalities*, not the sweep.
+The constants are read from the certified output; no Arb matrix is rebuilt, no
+$LDL^T$ is re-run, and Lean/Z3 never see the numbers as exact reals -- they see
+them as literals that must satisfy the stated relations. Track C therefore
+cannot certify $n_{+}$ or $n_{-}$; sections 1-6.6 still carry that claim.
+
 ---
 
 ## 7. Status of the sweep
@@ -574,9 +693,12 @@ python gw_check_refs.py
 python gw_omega_core_v2.py --c 100 --dims 20 --prec 9000 --out smoke_results.json
 python gw_verify_results.py smoke_results.json
 
-# the certified target (N=400 chain of the 2026-09-29 snapshot)
+# WARNING: both certified targets write omega_core_v2_results.json by default.
+# Running the N=400 line as written below OVERWRITES the shipped N=800 record
+# (section 6.6) with an N=400 one. Use --out <other name> unless you mean to
+# do that; the N=800 record survives only in git history and section 6.6.
 python gw_omega_core_v2.py --c 100 --dims 400 --prec 9000 --escalations 3 \
-    --out omega_core_v2_results.json
+    --out n400_rerun.json
 
 # the certified N=800 target exactly as executed 2026-09-30 -> 2026-10-01
 # (same argument list as gw_launch_v2.ps1)
@@ -586,16 +708,33 @@ python gw_omega_core_v2.py --c 100 --dims 800 --prec 18000 --escalations 0 \
 
 # production invariant gate (mandatory after any engine result)
 python gw_verify_production.py
+
+# Track C (section 6.7) -- re-derives the side-condition SMT file from this
+# README and the shipped Lean file, then drives z3; must print RESULT: PASS
+python track_c_make_smt.py
+
+# Track C Lean build: stage the shipped file byte-identically, then
+# lean -o <stage>/OMEGATrackC.olean <stage>/OMEGATrackC.lean   (must be exit 0)
+# full transcript of the run of record: track_c_lean_verify.log
 ```
 
-Note: `source_arb_ldlt_certify.py` must be importable from its own directory.
+Notes: `source_arb_ldlt_certify.py` must be importable from its own directory.
 Line 47 of `gw_qinf.py` sets `mp.mp.dps = 40` at module import time, and
-`python-flint` uses `flint.ctx.prec`; do not conflate the two.
+`python-flint` uses `flint.ctx.prec`; do not conflate the two. `D:\gw_ckpt` is
+the resume state of the certified run and is deliberately not shipped (5.3 GB);
+deleting it costs nothing for verification, only for a resumed sweep.
 
 ---
 
 *Generated for archival by the OMEGA-CORE session of 2026-09-29; the status
 table, sections 6.1, 6.3, 6.6 and the $N=800$ reproduction line were updated
-2026-10-01 after the sweep completed. Every number above was read from an
-executed run's output files; none was recomputed, rounded, or estimated for
-this document.*
+2026-10-01 after the sweep completed. Updated again 2026-10-02: header and
+scope extended to both certified targets, tool status narrowed to what was
+actually run (Lean/z3 for Track C only), section 6.7 added, the two source-package
+SHA-256 values reconciled in section 1, the attempt-1 max-entry-radius typo
+corrected to $2.154759$, section 4.3 rewritten from the final telemetry
+(0 ALERT during the run, 60 post-completion `SWEEP-DEAD`), the full three-phase
+$N=800$ run history and the `D:\gw_ckpt` timing corroboration added to 6.6,
+and the overwrite hazard spelled out in section 8. Every number above was read
+from an executed run's output files; none was recomputed, rounded, or estimated
+for this document.*

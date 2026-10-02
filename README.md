@@ -184,22 +184,57 @@ specific misreading, caught and reversed.
 | interval eigen-solver | `acb_mat.eig` via `arb_mat.eig`, `algorithm="rump"` |
 | quadrature | Gauss–Legendre per panel (GL48 → GL400), adaptive IBP tail |
 
-**Tooling status for every claim in this repository:**
+**Tooling status (stated per layer, not in one line):**
 
 ```
-python 3.14  +  mpmath  +  python-flint 0.9.0     RUN
-lean / coqc / isabelle / dkcheck / z3 / gcc        NOT RUN
+numerics   python 3.14 + mpmath + python-flint 0.9.0     RUN
+Track C    lean 4.33.1 + Mathlib                         RUN
+Track C    z3 4.16.0 (CLI) / z3 5.0.0 (Python binding)  RUN
+not run    coqc / isabelle / dkcheck / gcc               NOT RUN
 ```
 
-### 4.1 Track C — Lean 4 / Z3 integration: **NOT STARTED**
+Every eigenvalue, enclosure and bound reported here is produced by **ball
+arithmetic**, not by a proof assistant: the numerics are certified, they are
+not kernel-checked. What `lean` and `z3` run on is Track C, section 4.1 --
+the inference from those numbers and their exact-rational arithmetic.
 
-Formalisation remains **planned only**. `REPO_STRUCTURE.md` reserved a
-`proofs/TRACK_C.md` plan file; **neither that file nor the `proofs/`
-directory was ever created** (recorded in the postscript of that file as
-*promised and not produced*). **No Lean, Coq,
-Isabelle or Z3 artefact has been produced, and no claim here is machine-checked
-by a proof assistant.** `flint`'s interval arithmetic is an automatic numerics
-tool, not a proof assistant; describing it as such would be a category error.
+### 4.1 Track C — Lean 4 / Z3 integration: **SHIPPED 2026-10-02**
+
+This section read **NOT STARTED** in every earlier revision, and the
+`proofs/TRACK_C.md` plan file that `REPO_STRUCTURE.md` reserved was never
+written (that directory never existed either). What ships instead is the
+module itself, flat in the root:
+
+| file | role |
+|---|---|
+| `OMEGATrackC.lean` | 10 theorems: the Rayleigh/Weyl perturbation inference plus 7 side conditions as exact `ℚ` arithmetic |
+| `track_c_make_smt.py` | reads the constants out of this README **and** out of the Lean file (no hand copy), then drives `z3` |
+| `track_c_side_conditions.smt2` | generated `QF_NRA` file: one assertion, the conjunction of the 7 negations |
+| `track_c_smt_z3.log` | every `z3` answer — the conjunction and each negation separately |
+| `track_c_lean_verify.log` | `lean` build exit code + `#print axioms` for all 10 theorems |
+
+**What ran on 2026-10-02 (evidence in the two logs above):**
+
+* `lean` 4.33.1 compiled `OMEGATrackC.lean` with `exit=0`; `#print axioms`
+  on all ten theorems returns `[propext, Classical.choice, Quot.sound]` and
+  **no `sorryAx`**.
+* `z3` 4.16.0 answered `unsat` to the conjunction of the seven negations and
+  to each negation on its own (`7/7`); the literal cross-check found all
+  three constants in this README **and** in the Lean file, `MATCH` on both.
+* a circularity audit of `track_c_side_conditions.smt2` reports `GENUINE`:
+  the file carries a single assertion whose contradiction needs the claim
+  itself (`ctx=sat`, `script=unsat`, unsat core `[0]`), so no negated claim is
+  being proved from a context that already hides one.
+
+**What is deliberately out of scope.** `μ`, `ρ_actual` and `ρ*` are outputs
+of the FLINT/Arb stage and enter the Lean module as *literals*;
+`track_c_make_smt.py` proves that those literals are the ones printed in this
+README, **not** that they are the correct values. Ball arithmetic is an
+automatic numerics tool, not a proof assistant; describing it as one would be
+a category error. `coqc`, `isabelle` and `dkcheck` are not installed on the
+machine that produced this file, and `gcc` was not run.
+
+**No claim of kernel verification is made for the numerics themselves.**
 
 ### 4.2 Known hazards recorded in the source
 
@@ -361,6 +396,19 @@ python gw_omega_core_v2.py --c 100 --dims 400 --prec 9000 --escalations 3 \
 that `gw_qinf.py` line 47 sets `mp.mp.dps = 40` at module import time while
 `python-flint` uses `flint.ctx.prec` -- the two are not interchangeable.
 
+**Track C (added 2026-10-02).** Two commands, both exit 0 on the shipped
+files; neither needs any of the numerics above:
+
+```bash
+# 1. literal cross-check (README <-> Lean) + the seven side conditions via z3
+#    (regenerates track_c_side_conditions.smt2 and track_c_smt_z3.log)
+python track_c_make_smt.py
+
+# 2. type-check the module and print the axiom footprint of its 10 theorems
+#    (needs Lean 4.33.1 + Mathlib on LEAN_PATH; see track_c_lean_verify.log)
+lean OMEGATrackC.lean
+```
+
 ### 7.1 Tested environment and what reproduces identically
 
 Measured on the machine that produced the shipped results:
@@ -370,6 +418,8 @@ Measured on the machine that produced the shipped results:
 | CPython | 3.14.4 (`C:\Python314\python.exe`) |
 | python-flint | 0.9.0 (`flint.arb` / `flint.arb_mat`, ball arithmetic) |
 | mpmath | 1.3.0 (arbitrary-precision decimals, gate parsing only) |
+| Lean (Track C) | 4.33.1 (`x86_64-w64-windows-gnu`, commit `819816b2e0`) + Mathlib |
+| z3 (Track C) | 4.16.0 CLI, 5.0.0 Python binding |
 | OS | Windows 10, PowerShell 5.1, 2C/4T laptop, ~13 GB RAM |
 
 **Reproduces identically** on any machine with that toolchain:
@@ -381,7 +431,13 @@ Measured on the machine that produced the shipped results:
 * all three gates exit 0 on the shipped fixtures and the shipped production
   row: `python gw_check_refs.py`, `python gw_verify_results.py`,
   `python gw_verify_production.py` (seconds; run from any directory -- paths
-  resolve relative to each script file, since 2026-10-01).
+  resolve relative to each script file, since 2026-10-01);
+* Track C regenerates the same way: `python track_c_make_smt.py` re-reads the
+  three constants from this README *and* from `OMEGATrackC.lean`, rewrites
+  `track_c_side_conditions.smt2`, and must return `unsat` for the conjunction
+  and for each of the seven negations (`exit 0`);
+  `lean OMEGATrackC.lean` returns `exit 0` with the axiom footprint recorded
+  in `track_c_lean_verify.log`.
 
 **May differ across environments:**
 

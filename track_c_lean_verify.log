@@ -1,0 +1,23 @@
+source sha256 : 8894D24BEE7107DEE42EA2BCF3A6034323D1188872D41E43126B4326589FEA95
+stage  sha256 : 8894D24BEE7107DEE42EA2BCF3A6034323D1188872D41E43126B4326589FEA95
+source == stage: IDENTICAL
+recorded (UTC) : 2026-10-02T02:24:28Z
+command        : lean -o <stage>\\OMEGATrackC.olean <stage>\\OMEGATrackC.lean
+                 (stage = byte-identical copy of the shipped file; LEAN_PATH =
+                  <stage> plus 8 read-only Mathlib package build roots)
+lean          : Lean (version 4.33.1, x86_64-w64-windows-gnu, commit 819816b2e0a3bf405af45ae5c7af2491d8f5bee6, Release)
+mathlib roots : 8
+build OMEGATrackC.lean : exit=0  elapsed=12.6s  olean=358736 bytes
+'OMEGA.two_abs_mul_le_add_sq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OMEGA.enclosure_quad_bound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OMEGA.certified_positivity' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OMEGA.measured_within_tolerance' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OMEGA.margin_at_least_74_orders' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OMEGA.margin_satisfies_master_theorem' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OMEGA.tolerance_fails_the_coarse_bound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OMEGA.implied_constant_gt_81' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OMEGA.implied_constant_lt_82' depends on axioms: [propext, Classical.choice, Quot.sound]
+'OMEGA.tolerance_positive' depends on axioms: [propext, Classical.choice, Quot.sound]
+axiom footprint verify : exit=0
+theorems with printed axioms : 10/10   sorryAx/error lines: 0
+RESULT: PASS -- shipped OMEGATrackC.lean builds, 10/10 theorems carry only [propext, Classical.choice, Quot.sound].

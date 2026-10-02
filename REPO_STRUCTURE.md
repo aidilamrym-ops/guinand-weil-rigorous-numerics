@@ -97,6 +97,12 @@ omega-guinand-weil/
     └── update_registry.py
 ```
 
+> **Tree superseded as of 2026-09-29 / 2026-10-02** (details in the
+> postscript below): the repository is flat-root, and the `proofs/` entry with
+> `TRACK_C.md STATUS: NOT STARTED` was never produced as drawn -- Track C
+> instead shipped in the root on 2026-10-02 (`OMEGATrackC.lean` and friends).
+> The tree is left unedited as the original proposal record.
+
 ## Inventory as executed
 
 | category | count |
@@ -119,10 +125,18 @@ copies matches the canonical copies byte-for-byte.
 
 The proposal reserved a `proofs/` directory whose only content would have
 been `TRACK_C.md`, the Lean 4 / Z3 integration plan. **That directory was
-never created and `TRACK_C.md` was never written.** **No proof assistant has
-been run on any claim in this repository.** The reasoning behind an empty
+never created and `TRACK_C.md` was never written.** As of the 2026-09-29
+proposal, **no proof assistant had been run on any claim in this
+repository** -- which is exactly why the directory was left empty rather than
+filled with a placeholder. The reasoning behind an empty
 directory -- that an empty folder must not be mistakable for a completed one
 -- is honoured by saying this outright instead of shipping a placeholder.
+
+> **Superseded 2026-10-02.** Track C was later shipped *flat in the root*
+> (`OMEGATrackC.lean`, `track_c_make_smt.py`, `track_c_side_conditions.smt2`
+> and the two logs), not under `proofs/`; `lean` and `z3` have since been run
+> on the seven side conditions. The `proofs/` directory and `TRACK_C.md` were
+> still never created. See *Files added 2026-10-02* below and README §4.1.
 
 
 ---
@@ -148,8 +162,12 @@ holds for **six files** the tree above lists, none of which was ever produced:
 
 They are recorded here as *promised and not produced* rather than silently
 dropped, so a reader can tell the difference between a missing document and a
-forgotten one. `proofs/` never existed as a directory at all -- the statement
-that no proof assistant has been run still holds, and still applies.
+forgotten one. `proofs/` never existed as a directory at all, and `TRACK_C.md`
+was never written -- that part still holds. What no longer holds is the
+companion claim that no proof assistant has been run: Track C was shipped into
+the repository root on 2026-10-02, where `lean` compiled `OMEGATrackC.lean`
+and `z3` discharged the seven side conditions (README §4.1, and
+`track_c_lean_verify.log` / `track_c_smt_z3.log`).
 
 ### Files added 2026-09-29 (OMEGA-CORE chain)
 
@@ -208,6 +226,23 @@ engine, superseded by `gw_omega_core_v2.py` and referenced nowhere in this
 repository), `*.bak_*` CTP backups, and `task_backup_*.xml` (machine-local
 scheduled-task export).
 
+### Files added 2026-10-02 (Track C)
+
+| file | role |
+|---|---|
+| `OMEGATrackC.lean` | 10 theorems: the Rayleigh/Weyl perturbation inference plus 7 side conditions as exact `ℚ` arithmetic |
+| `track_c_make_smt.py` | cross-checks the constants README ↔ Lean, emits `track_c_side_conditions.smt2`, drives `z3` |
+| `track_c_side_conditions.smt2` | generated `QF_NRA` file: one assertion, the conjunction of the 7 negations |
+| `track_c_smt_z3.log` | `z3` answers, per negation and for the conjunction |
+| `track_c_lean_verify.log` | `lean` build exit code + `#print axioms` for all 10 theorems |
+
+These sit in the **root**, not in a `proofs/` directory -- the repository keeps
+its flat layout, and the promised `proofs/TRACK_C.md` plan file remains
+unwritten (recorded as such, not silently replaced). The two logs are shipped
+as evidence of runs that actually happened on 2026-10-02; what the module does
+*not* cover is stated in README §4.1 (the literals come from the FLINT/Arb
+stage and are not re-derived inside Lean).
+
 ### Current inventory (measured 2026-10-02)
 
 Counted from `git ls-files` on the published tree; supersedes the proposal
@@ -215,18 +250,23 @@ table above, which is left untouched as the 2026-09-29 record.
 
 | category | count |
 |---|---:|
-| tracked files (manifest covers 106 + `CHECKSUM.sha256` itself) | **107** |
-| `*.py` -- all pass `py_compile`, 0 failures | **51** |
+| tracked files (manifest covers 111 + `CHECKSUM.sha256` itself) | **112** |
+| `*.py` -- all pass `py_compile`, 0 failures | **52** |
 | `gw_*.py` | 47 |
 | `probe_*.py` | 2 |
-| other `*.py` (`source_arb_ldlt_certify.py`, `update_registry.py`) | 2 |
+| other `*.py` (`source_arb_ldlt_certify.py`, `update_registry.py`, `track_c_make_smt.py`) | 3 |
 | `*.md` | 10 |
-| `*.log` (forensic run logs, shipped on purpose) | 19 |
+| `*.log` (forensic run logs, shipped on purpose) | 21 |
 | `*.json` | 12 |
 | `*.ps1` | 2 |
-| working-tree size | 64.56 MB (67,700,404 bytes) |
+| `*.lean` (Track C) | 1 |
+| `*.smt2` (Track C, generated) | 1 |
+| working-tree size | 64.63 MB (67764294 bytes) |
 
 Verification re-run on this date: `python gw_check_refs.py`,
 `python gw_verify_results.py`, `python gw_verify_production.py` -- **all exit
-0**; `CHECKSUM.sha256` re-verified against every tracked file -- **0 hash or
-size mismatches**.
+0**; `python track_c_make_smt.py` -- **exit 0** (`unsat` 7/7 + combined,
+literal cross-check `MATCH` 3/3); `lean OMEGATrackC.lean` -- **exit 0** with
+axiom footprint `[propext, Classical.choice, Quot.sound]` on all 10 theorems;
+`CHECKSUM.sha256` re-verified against every listed file -- **0 hash or size
+mismatches**.

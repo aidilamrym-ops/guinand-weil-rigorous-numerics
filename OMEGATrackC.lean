@@ -267,9 +267,11 @@ clear the condition is the measured error `ρ_actual`, by 74 orders
 
 This is not an accusation against the report: it identifies *which* norm its
 Weyl step must have used. -/
-theorem tolerance_fails_the_coarse_bound : ¬ (rhoStar * nDim < lambdaMin) := by
-  simp only [not_lt]
-  norm_num
+-- Golfed to a single `by norm_num` (verified same statement, green
+-- build): the claim-pairing gate keys on single-tactic side
+-- conditions, and a two-tactic proof rode along unpaired until the
+-- gate ran on this file.
+theorem tolerance_fails_the_coarse_bound : ¬ (rhoStar * nDim < lambdaMin) := by norm_num
 
 /-- The reported literals pin the report's effective perturbation constant
 `λ_min / ρ*` from below: it exceeds `81`. -/

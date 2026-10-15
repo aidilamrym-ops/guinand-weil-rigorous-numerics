@@ -3,8 +3,11 @@
 
 What this script does (all steps are executed, none is assumed):
 
+0. Checks the Lean/SMT claim pairing both ways (every CLAIMS entry names
+   a `by norm_num` side-condition theorem and vice versa).
 1. Reads the three headline constants OUT OF README.md by regex -- it does
-   not trust a hand copy:
+   not trust a hand copy, and bare existence is not enough: each literal
+   must sit within 3 lines of a line naming its constant:
       lambda_min(Q_100,40), rho_actual, rho*
 2. Reads the matching `abbrev ... : ℚ := num / 10 ^ den` definitions OUT OF
    OMEGATrackC.lean.
@@ -37,7 +40,7 @@ is not a substitute for the Lean kernel check of the inference theorem
 `OMEGA.certified_positivity`.
 
 Exit codes: 0 = all cross-checks match and all claims UNSAT;
-            1 = literal mismatch; 2 = z3 missing; 3 = a claim not UNSAT.
+            1 = literal/pairing mismatch; 2 = z3 missing; 3 = a claim not UNSAT. --emit-only runs steps 0-2 and exits 0 (solver step skipped loudly).
 """
 
 from __future__ import annotations
@@ -129,9 +132,86 @@ def normalise(num_str: str, den: int) -> tuple[str, int]:
     return mantissa, exp10
 
 
-def readme_constants(readme_path: str) -> set[tuple[str, int]]:
-    text = open(readme_path, encoding="utf-8").read()
-    return {(m.group(1), int(m.group(2))) for m in README_NUM_RE.finditer(text)}
+# Per-constant README name patterns for the attribution check (audit
+# B-GW1). Narrow on purpose: a name that matches everywhere proves
+# nothing about attribution.
+NAME_PATTERNS = {
+    "lambdaMin": re.compile(r"lambda(_\{\\min\}|_min)"),
+    "rhoActual": re.compile(r"rho(_\{\\text\{actual\}\}|_actual)"),
+    "rhoStar": re.compile(r"rho\^?(\*|_\{?\*+\}?)"),
+}
+ATTRIBUTION_WINDOW = 3
+
+
+def readme_anchored_match(lines, name, mant, exp10):
+    """True iff the full-precision pair sits within +-3 lines of a line
+    naming the constant. Bare existence elsewhere does not count."""
+    pat = NAME_PATTERNS[name]
+    named = [i for i, ln in enumerate(lines) if pat.search(ln)]
+    for i in named:
+        lo = max(0, i - ATTRIBUTION_WINDOW)
+        hi = min(len(lines), i + ATTRIBUTION_WINDOW + 1)
+        for j in range(lo, hi):
+            for m in README_NUM_RE.finditer(lines[j]):
+                if (m.group(1), int(m.group(2))) == (mant, exp10):
+                    return True
+    return False
+
+
+def lean_norm_num_theorems(lean_path):
+    """Names of theorems whose entire proof is `by norm_num`.
+
+    Block-parsed (declaration to next declaration), so multi-line
+    signatures work. A side condition proved any other way fails
+    LOUDLY here rather than riding along unaudited.
+    """
+    text = open(lean_path, encoding="utf-8").read()
+    marks = [
+        (m.group(2), m.start())
+        for m in re.finditer(
+            r"^(theorem|lemma)\s+([A-Za-z_][A-Za-z0-9_]*)", text, re.M
+        )
+    ]
+    bounds = [s for _, s in marks] + [len(text)]
+    found = set()
+    for (name, s), e in zip(marks, bounds[1:]):
+        # Exact string equality on the proof line -- no regex at all.
+        # (An end-anchored regex failed here: docstrings of the NEXT
+        # declaration sit between, so blocks never end with the proof.
+        # Caught by running the gate on the unmodified file.)
+        for line in text[s:e].splitlines():
+            head, sep, tail = line.partition(':=')
+            if sep and tail.strip() == 'by norm_num':
+                found.add(name)
+                break
+    return found
+def check_claims_paired(lean_path):
+    """Bidirectional pairing CLAIMS <-> norm_num side-condition theorems.
+
+    A claim without a theorem (or a theorem without a claim) used to
+    ride along unaudited -- the pairing comment said "keep names
+    identical so a reader can pair them up", i.e. pairing by eye.
+    Returns (count, problems); problems is empty iff exact set match.
+    """
+    have = lean_norm_num_theorems(lean_path)
+    want = {label for (label, _, _) in CLAIMS}
+    problems = []
+    for label in sorted(want - have):
+        problems.append(
+            "CLAIMS entry %r has no `by norm_num` theorem in the Lean file"
+            % label
+        )
+    for name in sorted(have - want):
+        problems.append(
+            "Lean side-condition theorem %r is missing from CLAIMS" % name
+        )
+    if not have:
+        problems.append(
+            "no `by norm_num` theorems found at all -- parser or style changed"
+        )
+    return len(have), problems
+
+
 
 
 def build_smt(lean_consts: dict[str, tuple[str, int]]) -> str:
@@ -192,6 +272,9 @@ def main() -> int:
     ap.add_argument("--out-smt", default=os.path.join(here, "track_c_side_conditions.smt2"))
     ap.add_argument("--out-log", default=os.path.join(here, "track_c_smt_z3.log"))
     ap.add_argument("--z3", default=None, help="path to z3 (else Z3_EXE/PATH/known)")
+    ap.add_argument("--emit-only", action="store_true",
+                    help="run steps 0-2 (pairing, cross-check, SMT emission) "
+                         "and exit 0 without invoking a solver")
     args = ap.parse_args()
 
     log: list[str] = []
@@ -215,20 +298,33 @@ def main() -> int:
     emit(f"readme = {shown(args.readme)}")
     emit(f"lean   = {shown(args.lean)}")
 
-    # ---- step 1: literal cross-check (README vs Lean) --------------------
+    # ---- step 0: claim pairing (audit B-GW2) ----------------------------
+    paired, pairing_problems = check_claims_paired(args.lean)
+    if pairing_problems:
+        for line in pairing_problems:
+            emit("  PAIRING-FAIL " + line)
+        emit("RESULT: FAIL -- Lean/SMT claim pairing broken.")
+        open(args.out_log, "w", encoding="utf-8").write("\n".join(log) + "\n")
+        return 1
+    emit(f"  pairing: {paired} norm_num side-conditions <-> CLAIMS, exact match")
+
+    # ---- step 1: attributed literal cross-check (README vs Lean) --------
+    # Audit B-GW1: bare existence of the digit string anywhere in README
+    # is NOT enough (it could sit in an unrelated paragraph). Each Lean
+    # literal must appear within +-3 lines of a line naming its constant.
     lean_consts = lean_constants(args.lean)
-    readme_set = readme_constants(args.readme)
+    readme_lines = open(args.readme, encoding="utf-8").read().splitlines()
     mismatch = False
     for name in CHECKED:
         num, den = lean_consts[name]
         mant, exp10 = normalise(num, den)
-        ok = (mant, exp10) in readme_set
-        status = "MATCH" if ok else "MISMATCH"
-        emit(f"  {name:11s} lean={mant}e{exp10:+d}  readme={'found' if ok else 'NOT FOUND'}  -> {status}")
+        ok = readme_anchored_match(readme_lines, name, mant, exp10)
+        status = "MATCH (attributed)" if ok else "MISMATCH"
+        emit(f"  {name:11s} lean={mant}e{exp10:+d}  readme={'attributed' if ok else 'NOT FOUND near its name'}  -> {status}")
         if not ok:
             mismatch = True
     if mismatch:
-        emit("RESULT: FAIL -- Lean literals are not the README literals.")
+        emit("RESULT: FAIL -- Lean literals are not attributed README literals.")
         open(args.out_log, "w", encoding="utf-8").write("\n".join(log) + "\n")
         return 1
 
@@ -236,6 +332,10 @@ def main() -> int:
     smt = build_smt(lean_consts)
     open(args.out_smt, "w", encoding="utf-8", newline="\n").write(smt)
     emit(f"wrote {shown(args.out_smt)} ({len(smt)} bytes, {len(CLAIMS)} claims)")
+    if args.emit_only:
+        emit("NOTE --emit-only: SMT files emitted, solver step skipped loudly (no z3 verdict claimed).")
+        open(args.out_log, "w", encoding="utf-8").write("\n".join(log) + "\n")
+        return 0
 
     # ---- step 3: run z3, every negation must be unsat --------------------
     z3 = find_z3(args.z3)

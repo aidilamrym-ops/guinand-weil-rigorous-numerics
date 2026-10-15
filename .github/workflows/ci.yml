@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile gate script
+        run: python -m py_compile track_c_make_smt.py
+      - name: Pairing + cross-check + SMT emission (no solver on runner)
+        run: python track_c_make_smt.py --emit-only
+      - name: Solver step (local only, needs a z3 binary)
+        run: |
+          if command -v z3 >/dev/null 2>&1; then
+            python track_c_make_smt.py
+          else
+            echo "SKIP solver step: no z3 binary on runner (run locally where Z3_EXE exists)"
+          fi
